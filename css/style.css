@@ -235,6 +235,14 @@ body, html {
     transform: translateY(-1px);
 }
 
+.primary-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #666 !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
 /* Castle Platform Placement highlights */
 .placement-indicator {
     position: absolute;
@@ -249,12 +257,228 @@ body, html {
 }
 
 /* Music button styling */
+#music-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(22, 16, 12, 0.6);
+    color: #f5f0eb;
+    transition: all 0.2s ease;
+    z-index: 100;
+}
 #music-btn:hover {
-    background: rgba(197, 168, 128, 0.25) !important;
-    border-color: #c5a880 !important;
+    background: rgba(197, 168, 128, 0.25);
+    border-color: #c5a880;
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(197, 168, 128, 0.2);
 }
 #music-btn:active {
     transform: translateY(0);
+}
+
+/* Fullscreen button styling */
+#fullscreen-btn {
+    position: absolute;
+    top: 20px;
+    right: 130px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(22, 16, 12, 0.6);
+    color: #f5f0eb;
+    transition: all 0.2s ease;
+    z-index: 100;
+}
+#fullscreen-btn:hover {
+    background: rgba(197, 168, 128, 0.25);
+    border-color: #c5a880;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(197, 168, 128, 0.2);
+}
+#fullscreen-btn:active {
+    transform: translateY(0);
+}
+
+/* Start Footer styling */
+.start-footer {
+    position: absolute;
+    bottom: 20px;
+    font-size: 0.85rem;
+    color: #bfa895;
+    font-weight: 600;
+    text-align: center;
+    width: 100%;
+}
+
+/* Game Over Screen Specific elements */
+.final-score-title {
+    font-size: 1.5rem;
+    color: #ffd700;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+.qrcode-container {
+    margin: 10px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+.qrcode-img {
+    width: 140px;
+    height: 140px;
+    border-radius: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+}
+.qrcode-text {
+    font-size: 0.95rem;
+    color: #ffd700;
+    font-weight: 600;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+}
+
+/* Mobile Virtual Joystick CSS */
+#joystick-container {
+    position: absolute;
+    bottom: 30px;
+    left: 45px;
+    width: 110px;
+    height: 110px;
+    z-index: 99;
+    display: none; /* Enabled only on mobile views */
+}
+#joystick-base {
+    width: 110px;
+    height: 110px;
+    background: rgba(22, 16, 12, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+#joystick-knob {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, #c5a880 0%, #a38153 100%);
+    border-radius: 50%;
+    position: absolute;
+    top: 31px;
+    left: 31px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    touch-action: none;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* Mobile Layout Media Queries */
+@media (max-width: 820px) {
+    #top-hud {
+        gap: 16px;
+        padding: 8px 16px;
+        top: 10px;
+    }
+    .hud-label {
+        font-size: 0.65rem;
+        letter-spacing: 1px;
+    }
+    .hud-value {
+        font-size: 1.35rem;
+    }
+    #shop-panel {
+        width: 95%;
+        padding: 8px 16px;
+        bottom: 10px;
+        gap: 6px;
+    }
+    .shop-title {
+        font-size: 0.75rem;
+    }
+    .shop-btn {
+        padding: 8px 6px;
+        border-radius: 8px;
+    }
+    .shop-btn-name {
+        font-size: 0.75rem;
+    }
+    .shop-btn-cost {
+        font-size: 0.7rem;
+    }
+    #music-btn {
+        top: 10px;
+        right: 10px;
+        padding: 8px 12px;
+        font-size: 0.75rem;
+        border-radius: 8px;
+    }
+    #fullscreen-btn {
+        top: 10px;
+        right: 110px;
+        padding: 8px 12px;
+        font-size: 0.75rem;
+        border-radius: 8px;
+    }
+    #instruction-overlay {
+        display: none !important; /* Hide keyboard controls on mobile screen sizes */
+    }
+    #joystick-container {
+        display: block !important; /* Force enable joystick on smaller viewports */
+    }
+
+    /* Mobile overlay text & layout optimizations */
+    .screen-overlay {
+        gap: 12px;
+        padding: 24px 16px;
+        overflow-y: auto;
+        justify-content: flex-start;
+        padding-top: 40px;
+        padding-bottom: 40px;
+    }
+    .title-glow {
+        font-size: 1.8rem;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
+        text-align: center;
+    }
+    .subtitle {
+        font-size: 0.85rem;
+        line-height: 1.4;
+        max-width: 90%;
+        margin-bottom: 4px;
+    }
+    .primary-btn {
+        padding: 10px 32px;
+        font-size: 0.95rem;
+        border-radius: 20px;
+    }
+    .start-footer {
+        position: relative;
+        bottom: auto;
+        margin-top: 16px;
+        font-size: 0.75rem;
+    }
+    .final-score-title {
+        font-size: 1.2rem;
+        margin-bottom: 2px;
+    }
+    .qrcode-container {
+        margin: 5px 0;
+        gap: 4px;
+    }
+    .qrcode-img {
+        width: 100px;
+        height: 100px;
+    }
+    .qrcode-text {
+        font-size: 0.8rem;
+    }
 }

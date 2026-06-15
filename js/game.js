@@ -39,6 +39,12 @@ class GameController {
         this.waveDuration = 20000; // 20 seconds per wave
         this.spawnTimer = 0;
         this.spawnInterval = 3000; // spawn every 3 seconds initially
+        this.bossSpawned = false;
+
+        // Direct canvas touch control states
+        this.canvasTouchActive = false;
+        this.canvasTouchStart = { x: 0, y: 0 };
+        this.canvasTouchCurrent = { x: 0, y: 0 };
         
         // Performance
         this.clock = new THREE.Clock();
@@ -52,6 +58,9 @@ class GameController {
         this.bgMusic = new Audio('audio/Iron Gate Riot.mp3');
         this.bgMusic.loop = true;
         this.musicEnabled = true;
+
+        // Mobile Joystick
+        this.joystickVector = { x: 0, y: 0 };
     }
 
     init() {
@@ -121,6 +130,12 @@ class GameController {
         window.addEventListener('keydown', (e) => this.onKeyDown(e));
         window.addEventListener('keyup', (e) => this.onKeyUp(e));
 
+        // Setup Mobile Joystick
+        this.setupTouchJoystick();
+
+        // Setup Direct Canvas Touch Controls
+        this.setupDirectCanvasTouch();
+
         this.updateHUD();
         this.animate();
     }
@@ -135,6 +150,124 @@ class GameController {
         if (e.key in this.keys) {
             this.keys[e.key] = false;
         }
+    }
+
+    setupTouchJoystick() {
+        const base = document.getElementById('joystick-base');
+        const knob = document.getElementById('joystick-knob');
+        const container = document.getElementById('joystick-container');
+        
+        if (!base || !knob) return;
+
+        // Only show joystick on touch devices or small screens
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth <= 820;
+        if (isTouchDevice && container) {
+            container.style.display = 'block';
+        }
+
+        let active = false;
+        let startX = 0;
+        let startY = 0;
+        const maxDist = 38; // Radius of boundary (joystick range)
+
+        knob.addEventListener('touchstart', (e) => {
+            active = true;
+            const touch = e.touches[0];
+            const rect = base.getBoundingClientRect();
+            // Calculate center of base in viewport coordinates
+            startX = rect.left + rect.width / 2;
+            startY = rect.top + rect.height / 2;
+            e.preventDefault();
+        }, { passive: false });
+
+        window.addEventListener('touchmove', (e) => {
+            if (!active) return;
+            const touch = e.touches[0];
+            const dx = touch.clientX - startX;
+            const dy = touch.clientY - startY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            let moveX = dx;
+            let moveY = dy;
+
+            if (dist > maxDist) {
+                moveX = (dx / dist) * maxDist;
+                moveY = (dy / dist) * maxDist;
+            }
+
+            knob.style.transform = `translate(${moveX}px, ${moveY}px)`;
+            
+            // Normalize inputs: X is [-1, 1], Y is [-1, 1] (up is positive)
+            this.joystickVector.x = moveX / maxDist;
+            this.joystickVector.y = -moveY / maxDist;
+        }, { passive: true });
+
+        const resetJoystick = () => {
+            if (!active) return;
+            active = false;
+            knob.style.transform = 'translate(0px, 0px)';
+            this.joystickVector.x = 0;
+            this.joystickVector.y = 0;
+        };
+
+        window.addEventListener('touchend', resetJoystick);
+        window.addEventListener('touchcancel', resetJoystick);
+    }
+
+    setupDirectCanvasTouch() {
+        const container = document.getElementById('canvas-container');
+        if (!container) return;
+
+        const handleStart = (clientX, clientY) => {
+            if (!this.gameStarted || this.gameOver) return;
+            this.canvasTouchActive = true;
+            this.canvasTouchStart = { x: clientX, y: clientY };
+            this.canvasTouchCurrent = { x: clientX, y: clientY };
+        };
+
+        const handleMove = (clientX, clientY) => {
+            if (!this.canvasTouchActive) return;
+            this.canvasTouchCurrent = { x: clientX, y: clientY };
+        };
+
+        const handleEnd = () => {
+            this.canvasTouchActive = false;
+        };
+
+        // Mouse Events
+        container.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.hud-panel')) return;
+            handleStart(e.clientX, e.clientY);
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            handleMove(e.clientX, e.clientY);
+        });
+
+        window.addEventListener('mouseup', () => {
+            handleEnd();
+        });
+
+        // Touch Events
+        container.addEventListener('touchstart', (e) => {
+            if (e.target.closest('.hud-panel')) return;
+            const touch = e.touches[0];
+            handleStart(touch.clientX, touch.clientY);
+        }, { passive: true });
+
+        window.addEventListener('touchmove', (e) => {
+            if (!this.canvasTouchActive) return;
+            const touch = e.touches[0];
+            handleMove(touch.clientX, touch.clientY);
+        }, { passive: true });
+
+        window.addEventListener('touchend', () => {
+            handleEnd();
+        });
+
+        window.addEventListener('touchcancel', () => {
+            handleEnd();
+        });
     }
 
     spawnCacti() {
@@ -201,6 +334,8 @@ class GameController {
         this.gameOver = false;
         this.selectedShopItem = null;
         this.bossActive = false;
+        const vicScreen = document.getElementById('victory-screen');
+        if (vicScreen) vicScreen.classList.add('hidden');
 
         // Clear arrays
         this.enemies.forEach(e => e.destroy());
@@ -229,10 +364,20 @@ class GameController {
         this.waveTimer = 0;
         this.spawnTimer = 0;
         this.spawnInterval = 3000;
+        this.bossSpawned = false;
+        this.canvasTouchActive = false;
 
         this.totalKills = 0;
         this.castleFrozenTimer = 0;
         this.cameraShakeTimer = 0;
+
+        // Reset mobile joystick state
+        if (this.joystickVector) {
+            this.joystickVector.x = 0;
+            this.joystickVector.y = 0;
+        }
+        const knob = document.getElementById('joystick-knob');
+        if (knob) knob.style.transform = 'translate(0px, 0px)';
 
         const existingWarning = document.getElementById('earthquake-warning');
         if (existingWarning) existingWarning.remove();
@@ -456,6 +601,25 @@ class GameController {
 
             if (this.keys.ArrowUp || this.keys.w || this.keys.W) speedInput += 1;
             if (this.keys.ArrowDown || this.keys.s || this.keys.S) speedInput -= 1;
+
+            // Overlay touch joystick inputs if keyboard inputs are 0
+            if (rotationInput === 0 && speedInput === 0 && this.joystickVector) {
+                if (Math.abs(this.joystickVector.x) > 0.1) {
+                    rotationInput = -this.joystickVector.x;
+                }
+                if (Math.abs(this.joystickVector.y) > 0.1) {
+                    speedInput = this.joystickVector.y;
+                }
+            }
+
+            // Overlay direct canvas touch inputs if still 0 and canvas touch is active
+            if (rotationInput === 0 && speedInput === 0 && this.canvasTouchActive) {
+                speedInput = 1.0; // move forward while holding
+                const dx = this.canvasTouchCurrent.x - this.canvasTouchStart.x;
+                const steerThreshold = 100.0; // 100px drag for maximum turn
+                const steer = Math.max(-1.0, Math.min(1.0, dx / steerThreshold));
+                rotationInput = -steer; // Negative turns right
+            }
         }
 
         if (rotationInput !== 0 && this.castleFrozenTimer <= 0) {
@@ -510,29 +674,24 @@ class GameController {
 
         // 1. Spawning system
         this.spawnTimer += deltaTime * 1000;
-        if (this.spawnTimer >= this.spawnInterval) {
+        const currentInterval = this.bossActive ? 6000 : this.spawnInterval;
+        if (this.spawnTimer >= currentInterval) {
             this.spawnTimer = 0;
             this.spawnEnemy();
         }
 
         // 2. Wave controller
-        this.waveTimer += deltaTime * 1000;
-        if (this.waveTimer >= this.waveDuration) {
-            this.waveTimer = 0;
-            this.wave++;
-            this.score += 100;
-            this.spawnInterval = Math.max(1000, 3000 - (this.wave * 200));
-            this.updateHUD();
-
-            if (this.wave === 4) {
+        if (!this.bossSpawned) {
+            this.waveTimer += deltaTime * 1000;
+            if (this.waveTimer >= this.waveDuration) {
+                this.bossSpawned = true;
                 this.bossActive = true;
-                const alertDiv = document.createElement('div');
-                alertDiv.innerText = "⚠️ 警告：可愛大魔龍已降臨！";
-                alertDiv.style.cssText = "position:absolute; top:90px; left:50%; transform:translateX(-50%); color:red; font-size:1.8rem; font-weight:800; z-index:99; background:rgba(0,0,0,0.7); padding:10px 30px; border-radius:10px; border:2px solid red;";
-                document.body.appendChild(alertDiv);
-                setTimeout(() => alertDiv.remove(), 4000);
+                this.spawnBossDragon();
             }
         }
+
+        // Check for small monster merging
+        this.checkEnemyMerging();
 
         // 3. Update Enemies
         for (let i = this.enemies.length - 1; i >= 0; i--) {
@@ -541,6 +700,7 @@ class GameController {
                 this.enemies.splice(i, 1);
                 if (enemy.type === 'dragon') {
                     this.bossActive = false;
+                    this.onBossDefeated();
                 }
                 continue;
             }
@@ -548,8 +708,13 @@ class GameController {
             enemy.update(deltaTime, this.castle.position, this);
 
             // Check if reached castle
+            let colDist = 2.5;
+            if (enemy.type === 'dragon') {
+                const mult = enemy.waveNum === 3 ? 2.0 : (enemy.waveNum === 2 ? 1.5 : 1.0);
+                colDist = 2.5 * mult;
+            }
             const dist2D = this.getXZDistance(enemy.mesh.position, this.castle.position);
-            if (dist2D < 2.5) {
+            if (dist2D < colDist) {
                 const isDead = this.castle.takeDamage(enemy.damage);
                 this.updateHUD();
                 enemy.die();
@@ -632,20 +797,15 @@ class GameController {
 
     spawnEnemy() {
         let enemy;
-        
-        if (this.wave === 4 && this.bossActive && !this.enemies.some(e => e.type === 'dragon')) {
-            enemy = new BossDragon(this.scene);
+        const roll = Math.random();
+        if (roll < 0.4) {
+            enemy = new ZombieFast(this.scene);
+        } else if (roll < 0.65) {
+            enemy = new ZombieShooter(this.scene);
+        } else if (roll < 0.8 || this.wave < 2) {
+            enemy = new ZombieTank(this.scene);
         } else {
-            const roll = Math.random();
-            if (roll < 0.4) {
-                enemy = new ZombieFast(this.scene);
-            } else if (roll < 0.65) {
-                enemy = new ZombieShooter(this.scene);
-            } else if (roll < 0.8 || this.wave < 2) {
-                enemy = new ZombieTank(this.scene);
-            } else {
-                enemy = new ZombieMage(this.scene);
-            }
+            enemy = new ZombieMage(this.scene);
         }
 
         const angle = Math.random() * Math.PI * 2;
@@ -657,6 +817,134 @@ class GameController {
         );
 
         this.enemies.push(enemy);
+    }
+
+    spawnBossDragon() {
+        const enemy = new BossDragon(this.scene, this.wave);
+        const angle = Math.random() * Math.PI * 2;
+        const spawnRadius = 32;
+        enemy.mesh.position.set(
+            this.castle.position.x + Math.cos(angle) * spawnRadius,
+            0,
+            this.castle.position.z + Math.sin(angle) * spawnRadius
+        );
+        this.enemies.push(enemy);
+
+        // Display warning banner
+        const alertDiv = document.createElement('div');
+        alertDiv.innerText = `⚠️ 警告：魔龍降臨（波次 ${this.wave}）！`;
+        alertDiv.style.cssText = "position:absolute; top:90px; left:50%; transform:translateX(-50%); color:red; font-size:1.8rem; font-weight:800; z-index:99; background:rgba(0,0,0,0.85); padding:10px 30px; border-radius:10px; border:2px solid red; text-shadow: 0 0 10px rgba(255,0,0,0.5);";
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 4000);
+    }
+
+    onBossDefeated() {
+        if (this.wave < 3) {
+            this.wave++;
+            this.waveTimer = 0;
+            this.bossSpawned = false;
+            this.score += 500; // Bonus score
+            this.updateHUD();
+
+            // Wave clear announcement banner
+            const banner = document.createElement('div');
+            banner.innerText = `🎉 波次 ${this.wave - 1} 成功通關！下一波開始！`;
+            banner.style.cssText = "position:absolute; top:90px; left:50%; transform:translateX(-50%); color:#2ecc71; font-size:1.8rem; font-weight:800; z-index:99; background:rgba(0,0,0,0.85); padding:10px 30px; border-radius:10px; border:2px solid #2ecc71; text-shadow:0 0 10px rgba(46,204,113,0.5);";
+            document.body.appendChild(banner);
+            setTimeout(() => banner.remove(), 4000);
+        } else {
+            // Wave 3 Boss defeated -> VICTORY!
+            this.triggerVictory();
+        }
+    }
+
+    triggerVictory() {
+        this.gameOver = true;
+        this.gameStarted = false;
+        
+        // Update final scores
+        document.getElementById('victory-final-score').innerText = this.score;
+        
+        // Show victory screen
+        const screen = document.getElementById('victory-screen');
+        if (screen) {
+            screen.classList.remove('hidden');
+        }
+
+        // 15 second countdown
+        const restartBtn = document.getElementById('victory-restart-btn');
+        if (restartBtn) {
+            restartBtn.disabled = true;
+            let timeLeft = 15;
+            restartBtn.innerText = `請等待 ${timeLeft} 秒以重新開始 (${timeLeft}s)`;
+            
+            const timer = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    restartBtn.disabled = false;
+                    restartBtn.innerText = "重整旗鼓，再次啟動";
+                } else {
+                    restartBtn.innerText = `請等待 ${timeLeft} 秒以重新開始 (${timeLeft}s)`;
+                }
+            }, 1000);
+        }
+    }
+
+    checkEnemyMerging() {
+        const smallEnemies = this.enemies.filter(e => e.active && e.type !== 'dragon' && !e.isMergedGiant);
+        
+        for (let i = 0; i < smallEnemies.length; i++) {
+            const e1 = smallEnemies[i];
+            const neighbors = [];
+            
+            for (let j = 0; j < smallEnemies.length; j++) {
+                if (i === j) continue;
+                const e2 = smallEnemies[j];
+                const dist = e1.mesh.position.distanceTo(e2.mesh.position);
+                if (dist <= 2.5) {
+                    neighbors.push(e2);
+                }
+            }
+            
+            if (neighbors.length >= 2) {
+                const e2 = neighbors[0];
+                const e3 = neighbors[1];
+                
+                // Deactivate neighbors
+                e2.active = false;
+                e3.active = false;
+                e2.destroy();
+                e3.destroy();
+                
+                // Upgrade e1 to giant
+                e1.isMergedGiant = true;
+                
+                // Double damage and speed
+                e1.damage *= 2;
+                if (e1.magicDamage) e1.magicDamage *= 2;
+                e1.speed *= 2;
+                
+                // Combine health
+                e1.maxHealth = e1.maxHealth + e2.maxHealth + e3.maxHealth;
+                e1.health = e1.health + e2.health + e3.health;
+                e1.updateHealthBar();
+                
+                // Scale up mesh
+                if (e1.cardMesh) {
+                    e1.cardMesh.scale.set(1.8, 1.8, 1);
+                }
+                if (e1.healthBar) {
+                    e1.healthBar.position.y *= 1.8;
+                }
+                
+                // Spawn fusion blast effect
+                this.spawnExplosionEffect(e1.mesh.position, 1.5);
+                
+                // Break out of the loop so we don't process other merges this frame
+                break;
+            }
+        }
     }
 
     handleRaycast() {
@@ -828,6 +1116,18 @@ class GameController {
             if (btn) btn.innerText = "🔇 音樂: 關";
         }
     }
+
+    toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+            });
+            document.getElementById('fullscreen-btn').innerText = "📺 視窗化";
+        } else {
+            document.exitFullscreen();
+            document.getElementById('fullscreen-btn').innerText = "📺 全螢幕";
+        }
+    }
 }
 
 // Global initialization
@@ -839,6 +1139,10 @@ window.addEventListener('DOMContentLoaded', () => {
     // Hook buttons
     document.getElementById('start-btn').addEventListener('click', () => game.startNewGame());
     document.getElementById('restart-btn').addEventListener('click', () => game.startNewGame());
+    document.getElementById('victory-restart-btn').addEventListener('click', () => {
+        document.getElementById('victory-screen').classList.add('hidden');
+        game.startNewGame();
+    });
     
     // Defenders shop hooks
     document.getElementById('buy-archer-btn').addEventListener('click', () => game.selectShopItem('archer'));
@@ -859,4 +1163,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Music control hook
     document.getElementById('music-btn').addEventListener('click', () => game.toggleMusic());
+
+    // Fullscreen control hook
+    document.getElementById('fullscreen-btn').addEventListener('click', () => game.toggleFullscreen());
 });

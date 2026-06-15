@@ -4,6 +4,7 @@ class Enemy {
         this.type = type;
         this.active = true;
         this.spawnTime = Date.now();
+        this.isMergedGiant = false;
         
         // Define stats based on type
         if (type === 'fast') {
@@ -288,7 +289,46 @@ class ZombieFast extends Enemy { constructor(scene) { super(scene, 'fast'); } }
 class ZombieTank extends Enemy { constructor(scene) { super(scene, 'tank'); } }
 class ZombieShooter extends Enemy { constructor(scene) { super(scene, 'shooter'); } }
 class ZombieMage extends Enemy { constructor(scene) { super(scene, 'mage'); } }
-class BossDragon extends Enemy { constructor(scene) { super(scene, 'dragon'); } }
+class BossDragon extends Enemy {
+    constructor(scene, waveNum = 1) {
+        super(scene, 'dragon');
+        this.waveNum = waveNum;
+
+        // Base scale for Wave 1 is 1.0 (mesh scale is 3.2, health is 600, speed is 1.0)
+        // Wave 2 is 1.5x scale (health is 1000, speed 1.1, damage 45)
+        // Wave 3 is 2.0x scale (health is 1500, speed 1.2, damage 60)
+        let scaleMult = 1.0;
+        if (waveNum === 2) {
+            this.health = 1000;
+            this.maxHealth = 1000;
+            this.speed = 1.1;
+            this.damage = 45;
+            this.shootRange = 18;
+            this.goldReward = 300;
+            scaleMult = 1.5;
+        } else if (waveNum === 3) {
+            this.health = 1500;
+            this.maxHealth = 1500;
+            this.speed = 1.2;
+            this.damage = 60;
+            this.shootRange = 20;
+            this.goldReward = 500;
+            scaleMult = 2.0;
+        }
+
+        // Apply scale multipliers
+        if (this.cardMesh) {
+            this.cardMesh.scale.set(scaleMult, scaleMult, 1);
+        }
+        if (this.healthBar) {
+            // Reposition health bar based on new height
+            const baseScale = 2.2;
+            this.healthBar.position.y = 1.8 * baseScale * scaleMult;
+        }
+        
+        this.updateHealthBar();
+    }
+}
 
 window.Enemy = Enemy;
 window.ZombieFast = ZombieFast;

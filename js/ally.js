@@ -292,16 +292,46 @@ class Ally {
             this.healthBar.quaternion.copy(camera.quaternion);
         }
 
+        // Find nearest leader if we are a soldier
+        let leader = null;
+        if (this.type === 'soldier') {
+            let minLeaderDist = 999;
+            for (let other of game.allies) {
+                if (other.active && (other.type === 'princess' || other.type === 'general')) {
+                    const d = this.mesh.position.distanceTo(other.mesh.position);
+                    if (d < minLeaderDist) {
+                        minLeaderDist = d;
+                        leader = other;
+                    }
+                }
+            }
+        }
+
         // Find nearest enemy to engage
         let nearestEnemy = null;
-        let minDist = 30;
+        if (this.type === 'soldier' && leader && leader.engagedEnemy && leader.engagedEnemy.active) {
+            // Priority target: the leader's target
+            nearestEnemy = leader.engagedEnemy;
+        } else {
+            // Standard target: nearest enemy
+            let minDist = 30;
+            for (let enemy of enemies) {
+                if (!enemy.active) continue;
+                const dist = this.mesh.position.distanceTo(enemy.mesh.position);
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearestEnemy = enemy;
+                }
+            }
+        }
 
-        for (let enemy of enemies) {
-            if (!enemy.active) continue;
-            const dist = this.mesh.position.distanceTo(enemy.mesh.position);
-            if (dist < minDist) {
-                minDist = dist;
-                nearestEnemy = enemy;
+        this.engagedEnemy = nearestEnemy; // Store target for followers
+
+        let currentSpeed = this.speed;
+        if (this.type === 'soldier' && leader) {
+            const distToLeader = this.mesh.position.distanceTo(leader.mesh.position);
+            if (distToLeader > 6.0) {
+                currentSpeed = this.speed * 1.5; // Catch up speed boost
             }
         }
 
@@ -317,11 +347,11 @@ class Ally {
 
             if (dist > this.range) {
                 // Walk towards enemy
-                this.mesh.position.addScaledVector(dir, this.speed * deltaTime);
+                this.mesh.position.addScaledVector(dir, currentSpeed * deltaTime);
                 
                 // Bobbing walk animation
                 const elapsed = (Date.now() - this.spawnTime) * 0.01;
-                this.mesh.position.y = Math.abs(Math.sin(elapsed * this.speed)) * 0.15;
+                this.mesh.position.y = Math.abs(Math.sin(elapsed * currentSpeed)) * 0.15;
             } else {
                 // Stand ground and attack
                 this.mesh.position.y = 0;
@@ -349,7 +379,14 @@ class Ally {
                         }, 150);
 
                         // Damage target
-                        const died = nearestEnemy.takeDamage(this.damage);
+                        let finalDamage = this.damage;
+                        if (this.type === 'soldier' && leader) {
+                            const distToLeader = this.mesh.position.distanceTo(leader.mesh.position);
+                            if (distToLeader <= 5.0) {
+                                finalDamage = Math.round(this.damage * 1.5); // +50% attack correction!
+                            }
+                        }
+                        const died = nearestEnemy.takeDamage(finalDamage);
                         if (died) {
                             game.registerKill(nearestEnemy);
                         }
@@ -357,18 +394,25 @@ class Ally {
                 }
             }
         } else {
-            // No enemies: follow castle
-            const targetPos = castle.position.clone().add(new THREE.Vector3(0, 0, 3)); // stay behind/near castle
+            // No enemies: follow leader or follow castle
+            let targetPos = null;
+            if (this.type === 'soldier' && leader) {
+                // Stay close to leader
+                targetPos = leader.mesh.position.clone().add(new THREE.Vector3((Math.random() - 0.5) * 1.5, 0, -1.0));
+            } else {
+                targetPos = castle.position.clone().add(new THREE.Vector3(0, 0, 3)); // stay behind/near castle
+            }
             const dir = new THREE.Vector3().subVectors(targetPos, this.mesh.position);
             dir.y = 0;
             const dist = dir.length();
             
-            if (dist > 3) {
+            const minFollowDist = (this.type === 'soldier' && leader) ? 2.0 : 3.0;
+            if (dist > minFollowDist) {
                 dir.normalize();
                 moveDir.copy(dir);
-                this.mesh.position.addScaledVector(dir, this.speed * deltaTime);
+                this.mesh.position.addScaledVector(dir, currentSpeed * deltaTime);
                 const elapsed = (Date.now() - this.spawnTime) * 0.01;
-                this.mesh.position.y = Math.abs(Math.sin(elapsed * this.speed)) * 0.15;
+                this.mesh.position.y = Math.abs(Math.sin(elapsed * currentSpeed)) * 0.15;
             } else {
                 this.mesh.position.y = 0;
             }
