@@ -1,0 +1,7 @@
+backup/
+workbook.xlsx
+workbook_updated.xlsx
+outputs/
+work/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D moving-castle：沙漠求生戰</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+    <!-- 3D Render Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- HUD Overlay -->
+    <div id="top-hud" class="hud-panel">
+        <div class="hud-item">
+            <span class="hud-label">黃金</span>
+            <span id="gold-value" class="hud-value">200</span>
+        </div>
+        <div class="hud-item">
+            <span class="hud-label">波次</span>
+            <span id="wave-value" class="hud-value">1</span>
+        </div>
+        <div class="hud-item">
+            <span class="hud-label">城堡血量</span>
+            <span id="health-value" class="hud-value">500</span>
+        </div>
+        <div class="hud-item">
+            <span class="hud-label">分數</span>
+            <span id="score-value" class="hud-value">0</span>
+        </div>
+    </div>
+
+    <!-- Music Control Button -->
+    <button id="music-btn" class="hud-panel" style="top: 20px; right: 20px; padding: 10px 20px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(22, 16, 12, 0.6); color: #f5f0eb; transition: all 0.2s ease;">🔊 音樂: 開</button>
+
+    <!-- Instructions Panel -->
+    <div id="instruction-overlay" class="hud-panel">
+        <h3>🌵 moving-castle防線</h3>
+        <p>1. 使用 **方向鍵 ◀ ▶ ▲ ▼** 或 **WASD** moving-castle。</p>
+        <p>2. 購買「防禦者」（弓箭、擲斧、連弩、擲彈）點擊城堡發光甲板部署。</p>
+        <p>3. 召喚「英雄」（小兵、將軍、姬公主）出城對抗殭屍。</p>
+        <p>4. 所有單位都擁有**頭頂 3D 懸浮血條**！</p>
+    </div>
+
+    <!-- Bottom Shop Panel -->
+    <div id="shop-panel" class="hud-panel" style="max-width: 780px;">
+        <span class="shop-title">⚙️ 城堡終端機 (最多部署 4 隻甲板防禦)</span>
+        <div class="shop-items" style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <!-- Defenders -->
+            <button id="buy-archer-btn" class="shop-btn">
+                <span class="shop-btn-name">🏹 弓箭手</span>
+                <span class="shop-btn-cost">80💰</span>
+            </button>
+            <button id="buy-axeman-btn" class="shop-btn">
+                <span class="shop-btn-name">🪓 擲斧者</span>
+                <span class="shop-btn-cost">120💰</span>
+            </button>
+            <button id="buy-crossbow-btn" class="shop-btn">
+                <span class="shop-btn-name">⚙️ 連弩車</span>
+                <span class="shop-btn-cost">150💰</span>
+            </button>
+            <button id="buy-bomber-btn" class="shop-btn">
+                <span class="shop-btn-name">💣 擲彈兵</span>
+                <span class="shop-btn-cost">180💰</span>
+            </button>
+            
+            <!-- Melee Allies -->
+            <button id="spawn-soldier-btn" class="shop-btn" style="border-color: rgba(52, 152, 219, 0.4);">
+                <span class="shop-btn-name">💂 召喚小兵</span>
+                <span class="shop-btn-cost">50💰</span>
+            </button>
+            <button id="spawn-general-btn" class="shop-btn" style="border-color: rgba(231, 76, 60, 0.4);">
+                <span class="shop-btn-name">🛡️ 召喚將軍</span>
+                <span class="shop-btn-cost">120💰</span>
+            </button>
+            <button id="spawn-princess-btn" class="shop-btn" style="border-color: rgba(241, 196, 15, 0.4);">
+                <span class="shop-btn-name">👑 姬公主</span>
+                <span class="shop-btn-cost">180💰</span>
+            </button>
+            
+            <button id="repair-castle-btn" class="shop-btn">
+                <span class="shop-btn-name">🔧 修復城堡</span>
+                <span class="shop-btn-cost">50💰</span>
+            </button>
+            <button id="weather-magic-btn" class="shop-btn" style="border-color: #9b59b6;" disabled>
+                <span class="shop-btn-name">⚡ 天氣魔法</span>
+                <span class="shop-btn-cost" id="weather-kills-count">0/100 💀</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Start Screen Overlay -->
+    <div id="start-screen" class="screen-overlay">
+        <h1 class="title-glow">moving-castle：沙漠防線</h1>
+        <p class="subtitle">你控制著一座巨大的蒸氣moving-castle，正在被詛咒的沙漠深處穿行。四面八方的可愛二頭身殭屍即將湧來！召喚鋼鐵守衛，保護城堡的核心引擎不被摧毀！</p>
+        <button id="start-btn" class="primary-btn">啟動引擎，出發！</button>
+        <div style="position: absolute; bottom: 20px; font-size: 0.85rem; color: #bfa895; font-weight: 600;">貓老師+筱嵐二號開發，免費試玩</div>
+    </div>
+
+    <!-- Game Over Screen Overlay -->
+    <div id="gameover-screen" class="screen-overlay hidden">
+        <h1 class="title-glow" style="background: linear-gradient(45deg, #ff3333, #8b0000); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">城堡陷落</h1>
+        <p class="subtitle">蒸氣核心引擎已超載爆炸。你在這片黃沙中堅守到了最後。</p>
+        <p class="subtitle" style="font-size: 1.5rem; color: #ffd700; font-weight: 800; margin-bottom: 5px;">最終分數: <span id="final-score">0</span></p>
+        <div style="margin: 10px 0; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <img src="assets/qrcode.png" style="width: 140px; height: 140px; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.15);" alt="QR Code">
+            <span style="font-size: 0.95rem; color: #ffd700; font-weight: 600; text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);">歡迎訂閱貓老師臉書！</span>
+        </div>
+        <button id="restart-btn" class="primary-btn">重整旗鼓，再次啟動</button>
+    </div>
+
+    <!-- Game scripts loaded in sequence -->
+    <script src="js/textures_base64.js"></script>
+    <script src="js/projectile.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/defender.js"></script>
+    <script src="js/ally.js"></script>
+    <script src="js/castle.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
