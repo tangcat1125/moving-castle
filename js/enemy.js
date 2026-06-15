@@ -5,6 +5,7 @@ class Enemy {
         this.active = true;
         this.spawnTime = Date.now();
         this.isMergedGiant = false;
+        this.scaleMult = 1.0;
         
         // Define stats based on type
         if (type === 'fast') {
@@ -277,9 +278,9 @@ class Enemy {
             camRight.normalize();
             
             if (dir.dot(camRight) < 0) {
-                this.cardMesh.scale.x = -1; // Face left relative to screen
+                this.cardMesh.scale.x = -this.scaleMult; // Face left relative to screen
             } else {
-                this.cardMesh.scale.x = 1;  // Face right relative to screen
+                this.cardMesh.scale.x = this.scaleMult;  // Face right relative to screen
             }
         }
     }
@@ -315,6 +316,8 @@ class BossDragon extends Enemy {
             this.goldReward = 500;
             scaleMult = 2.0;
         }
+
+        this.scaleMult = scaleMult;
 
         // Apply scale multipliers
         if (this.cardMesh) {

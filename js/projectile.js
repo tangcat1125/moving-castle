@@ -24,12 +24,18 @@ class Projectile {
 
         // Movement direction
         this.dir = new THREE.Vector3().subVectors(this.targetPos, startPos);
-        this.dir.y = 0; // Move horizontally
+        if (this.type !== 'meteor') {
+            this.dir.y = 0; // Move horizontally
+        }
         this.dir.normalize();
         
         // For parabolic bone/axe/bomb arc
         this.startY = startPos.y;
-        this.distance = startPos.distanceTo(new THREE.Vector3(targetPos.x, startPos.y, targetPos.z));
+        if (this.type === 'meteor') {
+            this.distance = startPos.distanceTo(targetPos);
+        } else {
+            this.distance = startPos.distanceTo(new THREE.Vector3(targetPos.x, startPos.y, targetPos.z));
+        }
         this.movedDistance = 0;
     }
 
@@ -38,7 +44,7 @@ class Projectile {
         const loader = new THREE.TextureLoader();
         
         // Handle fallback in case of unknown type
-        const typeName = ['arrow', 'axe', 'bolt', 'bomb', 'bone', 'fireball', 'magic_bolt'].includes(this.type) ? this.type : 'arrow';
+        const typeName = ['arrow', 'axe', 'bolt', 'bomb', 'bone', 'fireball', 'magic_bolt', 'meteor'].includes(this.type) ? (this.type === 'meteor' ? 'fireball' : this.type) : 'arrow';
         const texture = window.loadGameTexture(loader, `assets/projectile/${typeName}.png`);
         texture.minFilter = THREE.LinearFilter;
         
@@ -54,6 +60,7 @@ class Projectile {
         if (this.type === 'bolt') size = 0.4;
         else if (this.type === 'magic_bolt') size = 0.45;
         else if (this.type === 'fireball') size = 0.6;
+        else if (this.type === 'meteor') size = 1.3;
         
         const geom = new THREE.PlaneGeometry(size, size);
         const card = new THREE.Mesh(geom, mat);
@@ -106,7 +113,7 @@ class Projectile {
 
         // Deactivate if reached destination or traveled too far
         if (this.movedDistance >= this.distance) {
-            if (this.type === 'bomb') {
+            if (this.type === 'bomb' || this.type === 'meteor') {
                 this.explode();
             } else {
                 this.destroy();

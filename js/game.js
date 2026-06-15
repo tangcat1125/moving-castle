@@ -38,7 +38,7 @@ class GameController {
         this.waveTimer = 0;
         this.waveDuration = 20000; // 20 seconds per wave
         this.spawnTimer = 0;
-        this.spawnInterval = 3000; // spawn every 3 seconds initially
+        this.spawnInterval = 1500; // spawn every 1.5 seconds initially for high merge rate
         this.bossSpawned = false;
 
         // Direct canvas touch control states
@@ -55,7 +55,8 @@ class GameController {
         this.cameraShakeTimer = 0;
 
         // Background Music
-        this.bgMusic = new Audio('audio/Iron Gate Riot.mp3');
+        this.bgMusic = new Audio('audio/Iron%20Gate%20Riot.mp3');
+        this.bgMusic.volume = 1.0;
         this.bgMusic.loop = true;
         this.musicEnabled = true;
 
@@ -363,13 +364,14 @@ class GameController {
         this.castle.updateHealthBar();
         this.waveTimer = 0;
         this.spawnTimer = 0;
-        this.spawnInterval = 3000;
+        this.spawnInterval = 1500;
         this.bossSpawned = false;
         this.canvasTouchActive = false;
 
         this.totalKills = 0;
         this.castleFrozenTimer = 0;
         this.cameraShakeTimer = 0;
+        this.dragonComboTimer = 0;
 
         // Reset mobile joystick state
         if (this.joystickVector) {
@@ -674,7 +676,9 @@ class GameController {
 
         // 1. Spawning system
         this.spawnTimer += deltaTime * 1000;
-        const currentInterval = this.bossActive ? 6000 : this.spawnInterval;
+        const intervalDivider = this.wave === 2 ? 2 : (this.wave === 3 ? 3 : 1);
+        const baseInterval = this.spawnInterval / intervalDivider;
+        const currentInterval = this.bossActive ? 6000 : baseInterval;
         if (this.spawnTimer >= currentInterval) {
             this.spawnTimer = 0;
             this.spawnEnemy();
@@ -699,8 +703,11 @@ class GameController {
             if (!enemy.active) {
                 this.enemies.splice(i, 1);
                 if (enemy.type === 'dragon') {
-                    this.bossActive = false;
-                    this.onBossDefeated();
+                    const remainingDragons = this.enemies.filter(e => e.active && e.type === 'dragon');
+                    if (remainingDragons.length === 0) {
+                        this.bossActive = false;
+                        this.onBossDefeated();
+                    }
                 }
                 continue;
             }
@@ -712,10 +719,16 @@ class GameController {
             if (enemy.type === 'dragon') {
                 const mult = enemy.waveNum === 3 ? 2.0 : (enemy.waveNum === 2 ? 1.5 : 1.0);
                 colDist = 2.5 * mult;
+            } else if (enemy.isMergedGiant) {
+                colDist = 2.5 * 1.8;
             }
             const dist2D = this.getXZDistance(enemy.mesh.position, this.castle.position);
             if (dist2D < colDist) {
-                const isDead = this.castle.takeDamage(enemy.damage);
+                let dmgToCastle = enemy.damage;
+                if (enemy.type !== 'dragon') {
+                    dmgToCastle = enemy.health * 2;
+                }
+                const isDead = this.castle.takeDamage(dmgToCastle);
                 this.updateHUD();
                 enemy.die();
 
@@ -793,6 +806,64 @@ class GameController {
 
         // 7. Raycast detection for slot hover highlighting
         this.handleRaycast();
+
+        // 8. Wave 3 Dragon Combo Skill: "滅世火雨"
+        if (this.wave === 3 && this.bossActive) {
+            const activeDragons = this.enemies.filter(e => e.active && e.type === 'dragon');
+            if (activeDragons.length >= 2) {
+                if (this.dragonComboTimer === undefined) this.dragonComboTimer = 0;
+                this.dragonComboTimer += deltaTime * 1000;
+                if (this.dragonComboTimer >= 8000) { // every 8 seconds
+                    this.dragonComboTimer = 0;
+                    this.triggerDragonComboSkill(activeDragons);
+                }
+            }
+        }
+
+        // 9. Update Boss Dragon Minimap Radar
+        const minimap = document.getElementById('minimap');
+        if (minimap) {
+            if (this.bossActive) {
+                minimap.classList.remove('hidden');
+                
+                // Clear existing dragon blips
+                const oldBlips = minimap.querySelectorAll('.dragon-blip');
+                oldBlips.forEach(b => b.remove());
+                
+                const activeDragons = this.enemies.filter(e => e.active && e.type === 'dragon');
+                activeDragons.forEach(dragon => {
+                    // Calculate local position relative to castle
+                    const dx = dragon.mesh.position.x - this.castle.position.x;
+                    const dz = dragon.mesh.position.z - this.castle.position.z;
+                    
+                    // Map range: 45 units in world maps to 50px (radar radius is 60px)
+                    const maxRadarRange = 45;
+                    const radarRadius = 50; // padding boundary
+                    
+                    const dist = Math.sqrt(dx * dx + dz * dz);
+                    const angle = Math.atan2(dz, dx);
+                    
+                    let radarDist = (dist / maxRadarRange) * radarRadius;
+                    if (radarDist > radarRadius) {
+                        radarDist = radarRadius; // Clamp to border
+                    }
+                    
+                    // 2D position relative to center of radar (60, 60)
+                    const rx = Math.cos(angle) * radarDist;
+                    const rz = Math.sin(angle) * radarDist;
+                    
+                    // Create blip element
+                    const blip = document.createElement('div');
+                    blip.className = 'dragon-blip';
+                    blip.innerHTML = '🐉';
+                    blip.style.left = `${60 + rx - 10}px`;
+                    blip.style.top = `${60 + rz - 10}px`;
+                    minimap.appendChild(blip);
+                });
+            } else {
+                minimap.classList.add('hidden');
+            }
+        }
     }
 
     spawnEnemy() {
@@ -820,19 +891,22 @@ class GameController {
     }
 
     spawnBossDragon() {
-        const enemy = new BossDragon(this.scene, this.wave);
-        const angle = Math.random() * Math.PI * 2;
-        const spawnRadius = 32;
-        enemy.mesh.position.set(
-            this.castle.position.x + Math.cos(angle) * spawnRadius,
-            0,
-            this.castle.position.z + Math.sin(angle) * spawnRadius
-        );
-        this.enemies.push(enemy);
+        const numDragons = this.wave === 3 ? 3 : 1;
+        for (let i = 0; i < numDragons; i++) {
+            const enemy = new BossDragon(this.scene, this.wave);
+            const angle = (Math.random() * Math.PI * 2) + (i * Math.PI * 2 / numDragons);
+            const spawnRadius = 32;
+            enemy.mesh.position.set(
+                this.castle.position.x + Math.cos(angle) * spawnRadius,
+                0,
+                this.castle.position.z + Math.sin(angle) * spawnRadius
+            );
+            this.enemies.push(enemy);
+        }
 
         // Display warning banner
         const alertDiv = document.createElement('div');
-        alertDiv.innerText = `⚠️ 警告：魔龍降臨（波次 ${this.wave}）！`;
+        alertDiv.innerText = this.wave === 3 ? "⚠️ 警告：三頭魔龍降臨（波次 3）！" : `⚠️ 警告：魔龍降臨（波次 ${this.wave}）！`;
         alertDiv.style.cssText = "position:absolute; top:90px; left:50%; transform:translateX(-50%); color:red; font-size:1.8rem; font-weight:800; z-index:99; background:rgba(0,0,0,0.85); padding:10px 30px; border-radius:10px; border:2px solid red; text-shadow: 0 0 10px rgba(255,0,0,0.5);";
         document.body.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 4000);
@@ -891,6 +965,44 @@ class GameController {
         }
     }
 
+    triggerDragonComboSkill(activeDragons) {
+        // Display warning banner
+        const alertDiv = document.createElement('div');
+        alertDiv.innerText = "🔥 警告：魔龍合體技「滅世火雨」發動！";
+        alertDiv.style.cssText = "position:absolute; top:130px; left:50%; transform:translateX(-50%); color:#e67e22; font-size:1.8rem; font-weight:800; z-index:99; background:rgba(0,0,0,0.85); padding:10px 30px; border-radius:10px; border:2px solid #e67e22; text-shadow: 0 0 10px rgba(230,126,34,0.5);";
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 3000);
+
+        // Shake camera for visual impact
+        this.cameraShakeTimer = 3.0;
+
+        // Spawn meteors falling from the sky around the castle
+        const numMeteors = activeDragons.length * 3;
+        for (let i = 0; i < numMeteors; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const dist = Math.random() * 12;
+            const targetPos = this.castle.position.clone().add(new THREE.Vector3(
+                Math.cos(angle) * dist,
+                0,
+                Math.sin(angle) * dist
+            ));
+
+            const startPos = targetPos.clone().add(new THREE.Vector3(
+                (Math.random() - 0.5) * 5,
+                12,
+                (Math.random() - 0.5) * 5
+            ));
+
+            const dmg = 45; // high damage
+            setTimeout(() => {
+                if (this.gameStarted && !this.gameOver) {
+                    const proj = new Projectile(this.scene, startPos, targetPos, 'meteor', dmg);
+                    this.projectiles.push(proj);
+                }
+            }, i * 250); // staggered falling
+        }
+    }
+
     checkEnemyMerging() {
         const smallEnemies = this.enemies.filter(e => e.active && e.type !== 'dragon' && !e.isMergedGiant);
         
@@ -919,6 +1031,7 @@ class GameController {
                 
                 // Upgrade e1 to giant
                 e1.isMergedGiant = true;
+                e1.scaleMult = 1.8;
                 
                 // Double damage and speed
                 e1.damage *= 2;
