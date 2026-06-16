@@ -11,7 +11,7 @@ class GameController {
         this.score = 0;
         this.gameOver = false;
         this.gameStarted = false;
-        this.selectedShopItem = null; 
+        this.selectedDeploymentItem = null; 
         this.bossActive = false;
         
         // Arrays for tracking game objects
@@ -62,6 +62,7 @@ class GameController {
 
         // Mobile Joystick
         this.joystickVector = { x: 0, y: 0 };
+
     }
 
     init() {
@@ -333,7 +334,7 @@ class GameController {
         this.wave = 1;
         this.score = 0;
         this.gameOver = false;
-        this.selectedShopItem = null;
+        this.selectedDeploymentItem = null;
         this.bossActive = false;
         const vicScreen = document.getElementById('victory-screen');
         if (vicScreen) vicScreen.classList.add('hidden');
@@ -457,7 +458,7 @@ class GameController {
         document.getElementById('health-value').innerText = this.castle.health;
         document.getElementById('score-value').innerText = this.score;
 
-        // Enable/disable shop buttons
+        // Enable/disable terminal action buttons
         const buyArcherBtn = document.getElementById('buy-archer-btn');
         const buyAxemanBtn = document.getElementById('buy-axeman-btn');
         const buyCrossbowBtn = document.getElementById('buy-crossbow-btn');
@@ -490,26 +491,9 @@ class GameController {
             weatherBtn.disabled = this.totalKills < 100 || this.gameOver || !this.gameStarted;
         }
 
-        // Mobile Shop Buttons Update
-        const upAttackBtn = document.getElementById('mobile-up-attack-btn');
-        const downDefenseBtn = document.getElementById('mobile-down-defense-btn');
-        if (upAttackBtn) {
-            const upCost = this.gold >= 120 ? 120 : 80;
-            const upName = this.gold >= 120 ? "⚔️ 上攻 (擲斧)" : "⚔️ 上攻 (弓箭)";
-            upAttackBtn.querySelector('.shop-btn-name').innerText = upName;
-            document.getElementById('up-attack-cost-text').innerText = `${upCost}💰`;
-            upAttackBtn.disabled = this.gold < 80 || limitReached;
-        }
-        if (downDefenseBtn) {
-            const downCost = this.gold >= 180 ? 180 : 150;
-            const downName = this.gold >= 180 ? "🛡️ 下防 (擲彈)" : "🛡️ 下防 (連弩)";
-            downDefenseBtn.querySelector('.shop-btn-name').innerText = downName;
-            document.getElementById('down-defense-cost-text').innerText = `${downCost}💰`;
-            downDefenseBtn.disabled = this.gold < 150 || limitReached;
-        }
     }
 
-    selectShopItem(item) {
+    selectDeploymentItem(item) {
         if (this.gameOver) return;
 
         // Auto deploy to first free slot immediately on clicking button
@@ -1342,28 +1326,14 @@ window.addEventListener('DOMContentLoaded', () => {
         document.getElementById('victory-screen').classList.add('hidden');
         game.startNewGame();
     });
-    
-    // Defenders shop hooks
-    document.getElementById('buy-archer-btn').addEventListener('click', () => game.selectShopItem('archer'));
-    document.getElementById('buy-axeman-btn').addEventListener('click', () => game.selectShopItem('axeman'));
-    document.getElementById('buy-crossbow-btn').addEventListener('click', () => game.selectShopItem('crossbow'));
-    document.getElementById('buy-bomber-btn').addEventListener('click', () => game.selectShopItem('bomber'));
-    
-    // Mobile Shop hooks
-    document.getElementById('mobile-up-attack-btn').addEventListener('click', () => {
-        if (game.gold >= 120 && game.defenders.length < 4) {
-            game.selectShopItem('axeman');
-        } else if (game.gold >= 80 && game.defenders.length < 4) {
-            game.selectShopItem('archer');
-        }
-    });
-    document.getElementById('mobile-down-defense-btn').addEventListener('click', () => {
-        if (game.gold >= 180 && game.defenders.length < 4) {
-            game.selectShopItem('bomber');
-        } else if (game.gold >= 150 && game.defenders.length < 4) {
-            game.selectShopItem('crossbow');
-        }
-    });
+
+
+
+    // Defenders deployment hooks
+    document.getElementById('buy-archer-btn').addEventListener('click', () => game.selectDeploymentItem('archer'));
+    document.getElementById('buy-axeman-btn').addEventListener('click', () => game.selectDeploymentItem('axeman'));
+    document.getElementById('buy-crossbow-btn').addEventListener('click', () => game.selectDeploymentItem('crossbow'));
+    document.getElementById('buy-bomber-btn').addEventListener('click', () => game.selectDeploymentItem('bomber'));
     
     // Melee Summons hooks
     document.getElementById('spawn-soldier-btn').addEventListener('click', () => game.spawnMeleeAlly('soldier'));
@@ -1371,7 +1341,7 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('spawn-princess-btn').addEventListener('click', () => game.spawnMeleeAlly('princess'));
     
     // Repair hook
-    document.getElementById('repair-castle-btn').addEventListener('click', () => game.selectShopItem('repair'));
+    document.getElementById('repair-castle-btn').addEventListener('click', () => game.selectDeploymentItem('repair'));
 
     // Weather magic hook
     document.getElementById('weather-magic-btn').addEventListener('click', () => game.triggerWeatherMagic());

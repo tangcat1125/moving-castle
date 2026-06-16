@@ -40,12 +40,55 @@ body, html {
 }
 
 #top-hud {
+    position: absolute;
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
+    width: min(380px, 95%);
     display: flex;
-    gap: 40px;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
+    z-index: 10;
+}
+
+.player-panel {
+    padding: 10px 16px;
+}
+
+.hud-stats-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    width: 100%;
+    text-align: center;
+}
+
+#attack-panel {
+    position: absolute;
+    top: 105px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(380px, 95%);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 10px 14px;
+    z-index: 10;
+}
+
+.attack-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    width: 100%;
+}
+
+.action-btn:focus-visible,
+.primary-btn:focus-visible,
+#music-btn:focus-visible,
+#fullscreen-btn:focus-visible {
+    outline: 2px solid #ffd700;
+    outline-offset: 2px;
 }
 
 .hud-item {
@@ -75,34 +118,27 @@ body, html {
     text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
 }
 
-/* Shop Menu Panel */
-#shop-panel {
+/* Terminal Menu Panel */
+#terminal-panel {
+    position: absolute;
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
-    width: 90%;
-    max-width: 600px;
+    width: min(500px, 95%);
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
+    z-index: 10;
 }
 
-.shop-title {
-    font-size: 0.9rem;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: #c5a880;
-    text-align: center;
+.terminal-items {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    width: 100%;
 }
 
-.shop-items {
-    display: flex;
-    justify-content: space-around;
-    gap: 15px;
-}
-
-.shop-btn {
+.action-btn {
     flex: 1;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -117,28 +153,28 @@ body, html {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.shop-btn:hover:not(:disabled) {
+.action-btn:hover:not(:disabled) {
     background: rgba(197, 168, 128, 0.2);
     border-color: #c5a880;
     transform: translateY(-3px);
     box-shadow: 0 5px 15px rgba(197, 168, 128, 0.2);
 }
 
-.shop-btn:active:not(:disabled) {
+.action-btn:active:not(:disabled) {
     transform: translateY(-1px);
 }
 
-.shop-btn:disabled {
+.action-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
 }
 
-.shop-btn-name {
+.action-btn-name {
     font-size: 0.85rem;
     font-weight: 600;
 }
 
-.shop-btn-cost {
+.action-btn-cost {
     font-size: 0.8rem;
     color: #ffd700;
     font-weight: 600;
@@ -386,67 +422,121 @@ body, html {
 
 /* Mobile Layout Media Queries */
 @media (max-width: 820px) {
-    #top-hud {
-        gap: 16px;
-        padding: 8px 16px;
-        top: 10px;
-    }
     .hud-label {
-        font-size: 0.65rem;
-        letter-spacing: 1px;
+        font-size: 0.6rem;
+        letter-spacing: 0.5px;
     }
     .hud-value {
-        font-size: 1.35rem;
+        font-size: 0.95rem;
+        font-weight: 800;
     }
-    #shop-panel {
-        width: 95%;
-        padding: 8px 16px;
-        bottom: 10px;
-        gap: 6px;
+    .action-btn {
+        padding: 6px 4px;
+        border-radius: 6px;
     }
-    .shop-title {
-        font-size: 0.75rem;
+    .action-btn-name {
+        font-size: 0.65rem;
     }
-    .shop-btn {
-        padding: 8px 6px;
-        border-radius: 8px;
+    .action-btn-cost {
+        font-size: 0.6rem;
     }
-    .shop-btn-name {
-        font-size: 0.75rem;
+    #instruction-overlay,
+    #deck-panel,
+    #joystick-container {
+        display: none !important; /* Hide keyboard instructions, deck cards, and joystick on mobile screen sizes */
     }
-    .shop-btn-cost {
-        font-size: 0.7rem;
+    #top-hud {
+        gap: 4px;
+        padding: 6px 10px;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100vw - 120px);
+        max-width: 250px;
+        right: unset;
+    }
+    .hud-stats-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4px;
+        width: 100%;
+    }
+    .hud-item {
+        padding: 4px 2px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 6px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    #attack-panel {
+        top: 72px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100vw - 120px);
+        max-width: 250px;
+        padding: 6px 10px;
+    }
+    .attack-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4px;
+    }
+    .attack-grid .action-btn {
+        padding: 6px 2px;
+        border-radius: 6px;
+    }
+    .attack-grid .action-btn-name {
+        font-size: 0.65rem;
+    }
+    .attack-grid .action-btn-cost {
+        font-size: 0.6rem;
     }
     #music-btn {
+        position: absolute;
         top: 10px;
         right: 10px;
-        padding: 8px 12px;
-        font-size: 0.75rem;
+        width: 85px;
+        padding: 6px 4px;
+        font-size: 0.7rem;
         border-radius: 8px;
+        z-index: 15;
+        text-align: center;
     }
     #fullscreen-btn {
-        top: 10px;
-        right: 110px;
-        padding: 8px 12px;
-        font-size: 0.75rem;
+        position: absolute;
+        top: 48px;
+        right: 10px;
+        width: 85px;
+        padding: 6px 4px;
+        font-size: 0.7rem;
         border-radius: 8px;
+        z-index: 15;
+        text-align: center;
     }
-    #instruction-overlay {
-        display: none !important; /* Hide keyboard controls on mobile screen sizes */
+    #terminal-panel {
+        width: 95%;
+        max-width: 450px;
+        padding: 8px 10px;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        gap: 4px;
     }
-    #joystick-container,
-    #spawn-soldier-btn,
-    #spawn-general-btn,
-    #spawn-princess-btn,
-    #weather-magic-btn,
-    #buy-archer-btn,
-    #buy-axeman-btn,
-    #buy-crossbow-btn,
-    #buy-bomber-btn {
-        display: none !important; /* Hide joystick and other desktop HUD actions on mobile */
+    .terminal-items {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 4px;
     }
-    .mobile-only-btn {
-        display: flex !important; /* Enable mobile unified buttons */
+    .terminal-items .action-btn {
+        padding: 6px 2px;
+        border-radius: 6px;
+        flex: unset;
+    }
+    .terminal-items .action-btn-name {
+        font-size: 0.65rem;
+    }
+    .terminal-items .action-btn-cost {
+        font-size: 0.6rem;
     }
 
     /* Mobile overlay text & layout optimizations */
@@ -563,4 +653,3 @@ body, html {
     z-index: 12;
     pointer-events: none;
 }
-

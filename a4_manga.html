@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A4日式漫畫：導引學生思考怎麼跟代理人設計遊戲</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;900&family=Zhi+Mang+Xing&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 0;
+        }
+
+        /* A4 Page container (210mm x 297mm) */
+        .a4-page {
+            width: 210mm;
+            height: 297mm;
+            background: #fff;
+            border: 6px double #000;
+            padding: 12mm;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            background-image: radial-gradient(#e6e6df 1px, transparent 1px);
+            background-size: 12px 12px;
+        }
+
+        /* Header Title Banner */
+        .manga-header {
+            text-align: center;
+            border-bottom: 4px double #000;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+        }
+
+        .manga-header h1 {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-weight: 900;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border: 3px solid #000;
+            display: inline-block;
+            padding: 4px 20px;
+            background: #000;
+            color: #fff;
+            transform: rotate(-1deg);
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.15);
+        }
+
+        .manga-header p {
+            font-family: 'Zhi Mang Xing', cursive;
+            font-size: 1.8rem;
+            color: #111;
+            margin-top: 4px;
+        }
+
+        /* 3x2 Manga Panel Grid (RTL Flow) */
+        .manga-grid {
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* Column mapping to preserve Z-pattern reading order (RTL: right col first) */
+        .panel-1 { grid-column: 2; grid-row: 1; }
+        .panel-2 { grid-column: 1; grid-row: 1; }
+        .panel-3 { grid-column: 2; grid-row: 2; }
+        .panel-4 { grid-column: 1; grid-row: 2; }
+        .panel-5 { grid-column: 2; grid-row: 3; }
+        .panel-6 { grid-column: 1; grid-row: 3; }
+
+        /* Panel design */
+        .panel {
+            background: #fff;
+            border: 4px solid #000;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 8px;
+        }
+
+        /* Skewed panels for dynamic feel */
+        .skew-r { clip-path: polygon(0 0, 100% 0, 100% 97%, 0 100%); }
+        .skew-l { clip-path: polygon(0 3%, 100% 0, 100% 100%, 0 97%); }
+
+        /* Screen tone */
+        .screentone {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(rgba(0,0,0,0.15) 15%, transparent 16%);
+            background-size: 6px 6px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Speedlines */
+        .speedlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(45deg, rgba(0,0,0,0.04), rgba(0,0,0,0.04) 4px, transparent 4px, transparent 12px);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Vertical Dialog Bubble */
+        .bubble {
+            position: absolute;
+            background: #fff;
+            border: 3px solid #000;
+            border-radius: 20px;
+            padding: 8px;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            font-size: 0.85rem;
+            font-weight: 900;
+            line-height: 1.3;
+            z-index: 10;
+            letter-spacing: 1px;
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.15);
+        }
+
+        .bubble-spiky {
+            border: none;
+            background: #fff;
+            filter: drop-shadow(2px 2px 0px #000);
+            clip-path: polygon(
+                50% 0%, 63% 10%, 80% 3%, 78% 22%, 98% 18%, 88% 38%, 100% 50%, 88% 62%, 98% 82%, 78% 78%, 80% 97%, 63% 90%, 50% 100%, 37% 90%, 20% 97%, 22% 78%, 2% 82%, 12% 62%, 0% 50%, 12% 38%, 2% 18%, 22% 22%, 20% 3%, 37% 10%
+            );
+            padding: 15px;
+            border-radius: 0;
+        }
+
+        .bubble-spiky-inner {
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+        }
+
+        .bubble-thought {
+            border-style: dashed;
+            font-size: 0.8rem;
+            color: #555;
+        }
+
+        .panel-num {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: #000;
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 900;
+            padding: 1px 6px;
+            border-radius: 3px;
+            z-index: 5;
+        }
+
+        .svg-container {
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .manga-svg {
+            max-width: 85%;
+            max-height: 85%;
+        }
+
+        /* Footer */
+        .manga-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #444;
+            margin-top: 8px;
+            border-top: 2px solid #000;
+            padding-top: 6px;
+            letter-spacing: 2px;
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                background: none;
+                padding: 0;
+            }
+            .a4-page {
+                box-shadow: none;
+                border: 4px double #000;
+                width: 210mm;
+                height: 297mm;
+                page-break-after: always;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="a4-page">
+        <!-- Main Title -->
+        <div class="manga-header">
+            <h1>導引學生思考怎麼跟代理人設計遊戲</h1>
+            <p>小咪老師與虎斑貓的互動漫才教育指南</p>
+        </div>
+
+        <!-- Manga Layout -->
+        <div class="manga-grid">
+
+            <!-- PANEL 1 (Top Right) -->
+            <div class="panel panel-1 skew-r">
+                <span class="panel-num">1</span>
+                <div class="screentone"></div>
+                <div class="bubble" style="top: 10px; right: 10px; height: 160px;">
+                    跟代理人設計遊戲，<br>第一步是學會<br>「對話與拆解」！
+                </div>
+
+                <div class="svg-container">
+                    <svg viewBox="0 0 200 200" class="manga-svg">
+                        <!-- Tabby Cat & Student Co-design -->
+                        <g transform="translate(45, 90)">
+                            <!-- Student with glasses -->
+                            <circle cx="0" cy="15" r="22" fill="#fff" stroke="#000" stroke-width="3"/>
+                            <path d="M-15,10 Q-5,10 0,12" stroke="#000" stroke-width="3" fill="none"/>
+                            <!-- Glasses -->
+                            <rect x="-18" y="5" width="10" height="8" rx="2" fill="none" stroke="#000" stroke-width="2.5"/>
+                            <rect x="-4" y="5" width="10" height="8" rx="2" fill="none" stroke="#000" stroke-width="2.5"/>
+                            <line x1="-8" y1="9" x2="-4" y2="9" stroke="#000" stroke-width="2"/>
+                            <!-- Hair -->
+                            <path d="M-25,5 Q-10,-15 15,0 Q10,12 -5,8 Z" fill="#2d2d2d" stroke="#000" stroke-width="3"/>
+                        </g>
+                        <g transform="translate(130, 95)">
+                            <!-- Tabby Cat pointing -->
+                            <circle cx="0" cy="10" r="22" fill="#e68a4b" stroke="#000" stroke-width="3"/>
+                            <!-- Ears -->
+                            <polygon points="-20,-5 -12,10 -5,2" fill="#e68a4b" stroke="#000" stroke-width="2"/>
+                            <polygon points="5,2 12,10 20,-5" fill="#e68a4b" stroke="#000" stroke-width="2"/>
+                            <!-- Stripes -->
+                            <path d="M-15,6 L-5,8" stroke="#7e3d11" stroke-width="2.5"/>
+                            <path d="M15,6 L5,8" stroke="#7e3d11" stroke-width="2.5"/>
+                            <!-- Eyes -->
+                            <path d="M-10,10 Q-6,7 -2,10" fill="none" stroke="#000" stroke-width="2.5"/>
+                            <path d="M2,10 Q6,7 10,10" fill="none" stroke="#000" stroke-width="2.5"/>
+                            <!-- Pointing paw -->
+                            <line x1="-15" y1="20" x2="-35" y2="15" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+                        </g>
+                        <!-- Laptop -->
+                        <path d="M75,130 L125,130 L115,145 L65,145 Z" fill="#fff" stroke="#000" stroke-width="3"/>
+                        <line x1="70" y1="130" x2="70" y2="105" stroke="#000" stroke-width="3"/>
+                        <line x1="70" y1="105" x2="110" y2="105" stroke="#000" stroke-width="3"/>
+                        <line x1="110" y1="105" x2="120" y2="130" stroke="#000" stroke-width="3"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- PANEL 2 (Top Left) -->
+            <div class="panel panel-2 skew-l">
+                <span class="panel-num">2</span>
+                <div class="speedlines"></div>
+                <div class="bubble bubble-spiky" style="top: 10px; left: 10px; height: 190px;">
+                    <div class="bubble-spiky-inner">
+                        不要只說「做遊戲」！<br>教學生將系統拆解成：<br>角色、敵人與規則！
+                    </div>
+                </div>
+
+                <div class="svg-container">
+                    <svg viewBox="0 0 200 200" class="manga-svg">
+                        <!-- Deconstructed Game Blocks -->
+                        <!-- Block 1: Player -->
+                        <g transform="translate(100, 50)">
+                            <rect x="-35" y="-15" width="70" height="30" fill="#fff" stroke="#000" stroke-width="3" rx="5"/>
+                            <text x="0" y="5" font-family="'Noto Sans TC'" font-weight="900" font-size="12" text-anchor="middle">【玩家城堡】</text>
+                        </g>
+                        <!-- Block 2: Enemy -->
+                        <g transform="translate(70, 110)">
+                            <rect x="-35" y="-15" width="70" height="30" fill="#fff" stroke="#000" stroke-width="3" rx="5"/>
+                            <text x="0" y="5" font-family="'Noto Sans TC'" font-weight="900" font-size="12" text-anchor="middle">【殭屍怪物】</text>
+                        </g>
+                        <!-- Block 3: Rule -->
+                        <g transform="translate(140, 140)">
+                            <rect x="-35" y="-15" width="70" height="30" fill="#fff" stroke="#000" stroke-width="3" rx="5"/>
+                            <text x="0" y="5" font-family="'Noto Sans TC'" font-weight="900" font-size="12" text-anchor="middle">【核心規則】</text>
+                        </g>
+                        <!-- Cut Line/Sword slash -->
+                        <path d="M20,160 L180,30" stroke="#000" stroke-width="6" stroke-dasharray="8,8"/>
+                        <!-- Flash effect -->
+                        <polygon points="100,95 110,80 95,85" fill="#000"/>
+                        <polygon points="120,75 130,60 115,65" fill="#000"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- PANEL 3 (Middle Right) -->
+            <div class="panel panel-3 skew-l">
+                <span class="panel-num">3</span>
+                <div class="screentone"></div>
+                <div class="bubble" style="top: 10px; right: 10px; height: 180px;">
+                    每前進一小步，<br>就要立刻做測試！<br>看控制台有沒有報錯！
+                </div>
+
+                <div class="svg-container">
+                    <svg viewBox="0 0 200 200" class="manga-svg">
+                        <!-- Checkpoint list & testing -->
+                        <g transform="translate(100, 100)">
+                            <!-- Big Checkmark Board -->
+                            <rect x="-55" y="-45" width="110" height="90" fill="#fff" stroke="#000" stroke-width="4" rx="10"/>
+                            <!-- Checkbox 1 -->
+                            <rect x="-45" y="-30" width="15" height="15" fill="none" stroke="#000" stroke-width="3"/>
+                            <path d="M-45,-25 L-40,-20 L-32,-32" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+                            <text x="-20" y="-18" font-family="monospace" font-size="10" font-weight="bold">BGM Toggle [OK]</text>
+
+                            <!-- Checkbox 2 -->
+                            <rect x="-45" y="-5" width="15" height="15" fill="none" stroke="#000" stroke-width="3"/>
+                            <path d="M-45,0 L-40,5 L-32,-7" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+                            <text x="-20" y="7" font-family="monospace" font-size="10" font-weight="bold">Joystick  [OK]</text>
+
+                            <!-- Checkbox 3 -->
+                            <rect x="-45" y="20" width="15" height="15" fill="none" stroke="#000" stroke-width="3"/>
+                            <path d="M-45,25 L-40,30 L-32,18" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+                            <text x="-20" y="32" font-family="monospace" font-size="10" font-weight="bold">No Console Error</text>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- PANEL 4 (Middle Left) -->
+            <div class="panel panel-4 skew-r">
+                <span class="panel-num">4</span>
+                <div class="speedlines"></div>
+                <div class="bubble bubble-spiky" style="top: 10px; left: 10px; height: 180px;">
+                    <div class="bubble-spiky-inner">
+                        「請做重力跳躍」<br>比「做好玩遊戲」<br>更有效！學會給予<br>精確的提示詞！
+                    </div>
+                </div>
+
+                <div class="svg-container">
+                    <svg viewBox="0 0 200 200" class="manga-svg">
+                        <!-- Prompt Chat bubbles comparing bad vs good -->
+                        <g transform="translate(60, 60)">
+                            <!-- Bad prompt -->
+                            <path d="M-40,-20 L40,-20 Q50,-20 50,-10 L50,15 Q50,25 40,25 L-20,25 L-35,35 L-30,25 L-40,25 Q-50,25 -50,15 L-50,-10 Q-50,-20 -40,-20 Z" fill="#fff" stroke="#000" stroke-width="2.5"/>
+                            <text x="0" y="2" font-family="'Noto Sans TC'" font-size="10" font-weight="900" fill="#e74c3c" text-anchor="middle">我要好玩的遊戲！</text>
+                            <text x="0" y="15" font-family="'Noto Sans TC'" font-size="9" fill="#7f8c8d" text-anchor="middle">(過於模糊 ❌)</text>
+                        </g>
+                        <g transform="translate(130, 130)">
+                            <!-- Good prompt -->
+                            <path d="M-40,-20 L40,-20 Q50,-20 50,-10 L50,15 Q50,25 40,25 L0,25 L-15,35 L-10,25 L-40,25 Q-50,25 -50,15 L-50,-10 Q-50,-20 -40,-20 Z" fill="#fff" stroke="#000" stroke-width="3"/>
+                            <text x="0" y="2" font-family="'Noto Sans TC'" font-size="9" font-weight="900" fill="#2ecc71" text-anchor="middle">請幫我寫一個搖桿，</text>
+                            <text x="0" y="14" font-family="'Noto Sans TC'" font-size="9" font-weight="900" fill="#2ecc71" text-anchor="middle">控制城堡的移動速度</text>
+                            <text x="0" y="23" font-family="'Noto Sans TC'" font-size="8" fill="#7f8c8d" text-anchor="middle">(精準具體 ✅)</text>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- PANEL 5 (Bottom Right) -->
+            <div class="panel panel-5 skew-r">
+                <span class="panel-num">5</span>
+                <div class="screentone"></div>
+                <div class="bubble" style="top: 10px; right: 10px; height: 180px;">
+                    將創意融入遊戲！<br>比方說姬公主大招，<br>或是加入搞笑漫才，<br>展現獨特風格！
+                </div>
+
+                <div class="svg-container">
+                    <svg viewBox="0 0 200 200" class="manga-svg">
+                        <!-- Princess and flame sword / Castle -->
+                        <g transform="translate(100, 100)">
+                            <!-- Castle chassis flat -->
+                            <rect x="-40" y="15" width="80" height="20" fill="#fff" stroke="#000" stroke-width="3" rx="4"/>
+                            <circle cx="-25" cy="35" r="10" fill="#fff" stroke="#000" stroke-width="3"/>
+                            <circle cx="25" cy="35" r="10" fill="#fff" stroke="#000" stroke-width="3"/>
+                            <!-- Flame Sword dynamic -->
+                            <path d="M-55,-10 L5,-45 L-10,-5 Z" fill="#fff" stroke="#000" stroke-width="3"/>
+                            <!-- Fire energy strokes -->
+                            <path d="M-40,-20 Q-25,-30 -15,-40" stroke="#000" stroke-width="3" fill="none"/>
+                            <path d="M-50,-5 Q-35,-15 -25,-25" stroke="#000" stroke-width="3" fill="none"/>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- PANEL 6 (Bottom Left) -->
+            <div class="panel panel-6 skew-l">
+                <span class="panel-num">6</span>
+                <div class="screentone"></div>
+                <div class="bubble bubble-thought" style="bottom: 10px; left: 10px; height: 175px;">
+                    教學生合作，<br>而不是被代理人牽著走！<br>主導邏輯思維才是<br>程式教育的真諦！
+                </div>
+
+                <div class="svg-container" style="justify-content: flex-end; padding-right: 10px;">
+                    <svg viewBox="0 0 200 200" class="manga-svg">
+                        <!-- Hsiao-Mi pointing to a blackboard -->
+                        <g transform="translate(140, 90)">
+                            <circle cx="0" cy="-10" r="20" fill="#fff" stroke="#000" stroke-width="3"/>
+                            <path d="M-5,10 Q5,25 0,35" stroke="#000" stroke-width="3" fill="none"/>
+                            <!-- Ponytail -->
+                            <path d="M12,-25 Q30,-20 25,10 Q10,15 5,0 Z" fill="#2d2d2d" stroke="#000" stroke-width="3"/>
+                            <!-- Arm pointing -->
+                            <line x1="-15" y1="5" x2="-45" y2="-15" stroke="#000" stroke-width="4" stroke-linecap="round"/>
+                        </g>
+                        <!-- Blackboard -->
+                        <rect x="15" y="45" width="90" height="65" fill="#fff" stroke="#000" stroke-width="3" rx="4"/>
+                        <rect x="20" y="50" width="80" height="55" fill="#fff" stroke="#000" stroke-width="1.5"/>
+                        <text x="60" y="72" font-family="'Noto Sans TC'" font-weight="900" font-size="11" text-anchor="middle">思維主導</text>
+                        <text x="60" y="90" font-family="monospace" font-size="9" text-anchor="middle">Student > AI</text>
+                    </svg>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="manga-footer">
+            設計者：小咪老師與打指令的虎斑貓 • 適合 A4 列印導引教材 • 2026
+        </div>
+    </div>
+
+</body>
+</html>
