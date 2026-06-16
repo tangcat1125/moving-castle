@@ -83,7 +83,7 @@ body, html {
     width: 100%;
 }
 
-.shop-btn:focus-visible,
+.action-btn:focus-visible,
 .primary-btn:focus-visible,
 #music-btn:focus-visible,
 #fullscreen-btn:focus-visible {
@@ -118,8 +118,8 @@ body, html {
     text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
 }
 
-/* Shop Menu Panel */
-#shop-panel {
+/* Terminal Menu Panel */
+#terminal-panel {
     position: absolute;
     bottom: 20px;
     left: 50%;
@@ -131,14 +131,14 @@ body, html {
     z-index: 10;
 }
 
-.shop-items {
+.terminal-items {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 8px;
     width: 100%;
 }
 
-.shop-btn {
+.action-btn {
     flex: 1;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -153,28 +153,28 @@ body, html {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.shop-btn:hover:not(:disabled) {
+.action-btn:hover:not(:disabled) {
     background: rgba(197, 168, 128, 0.2);
     border-color: #c5a880;
     transform: translateY(-3px);
     box-shadow: 0 5px 15px rgba(197, 168, 128, 0.2);
 }
 
-.shop-btn:active:not(:disabled) {
+.action-btn:active:not(:disabled) {
     transform: translateY(-1px);
 }
 
-.shop-btn:disabled {
+.action-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
 }
 
-.shop-btn-name {
+.action-btn-name {
     font-size: 0.85rem;
     font-weight: 600;
 }
 
-.shop-btn-cost {
+.action-btn-cost {
     font-size: 0.8rem;
     color: #ffd700;
     font-weight: 600;
@@ -430,14 +430,14 @@ body, html {
         font-size: 0.95rem;
         font-weight: 800;
     }
-    .shop-btn {
+    .action-btn {
         padding: 6px 4px;
         border-radius: 6px;
     }
-    .shop-btn-name {
+    .action-btn-name {
         font-size: 0.65rem;
     }
-    .shop-btn-cost {
+    .action-btn-cost {
         font-size: 0.6rem;
     }
     #instruction-overlay,
@@ -482,14 +482,14 @@ body, html {
         grid-template-columns: repeat(4, 1fr);
         gap: 4px;
     }
-    .attack-grid .shop-btn {
+    .attack-grid .action-btn {
         padding: 6px 2px;
         border-radius: 6px;
     }
-    .attack-grid .shop-btn-name {
+    .attack-grid .action-btn-name {
         font-size: 0.65rem;
     }
-    .attack-grid .shop-btn-cost {
+    .attack-grid .action-btn-cost {
         font-size: 0.6rem;
     }
     #music-btn {
@@ -514,7 +514,7 @@ body, html {
         z-index: 15;
         text-align: center;
     }
-    #shop-panel {
+    #terminal-panel {
         width: 95%;
         max-width: 450px;
         padding: 8px 10px;
@@ -523,19 +523,19 @@ body, html {
         transform: translateX(-50%);
         gap: 4px;
     }
-    .shop-items {
+    .terminal-items {
         grid-template-columns: repeat(5, 1fr);
         gap: 4px;
     }
-    .shop-items .shop-btn {
+    .terminal-items .action-btn {
         padding: 6px 2px;
         border-radius: 6px;
         flex: unset;
     }
-    .shop-items .shop-btn-name {
+    .terminal-items .action-btn-name {
         font-size: 0.65rem;
     }
-    .shop-items .shop-btn-cost {
+    .terminal-items .action-btn-cost {
         font-size: 0.6rem;
     }
 

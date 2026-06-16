@@ -11,7 +11,7 @@ class GameController {
         this.score = 0;
         this.gameOver = false;
         this.gameStarted = false;
-        this.selectedShopItem = null; 
+        this.selectedDeploymentItem = null; 
         this.bossActive = false;
         
         // Arrays for tracking game objects
@@ -334,7 +334,7 @@ class GameController {
         this.wave = 1;
         this.score = 0;
         this.gameOver = false;
-        this.selectedShopItem = null;
+        this.selectedDeploymentItem = null;
         this.bossActive = false;
         const vicScreen = document.getElementById('victory-screen');
         if (vicScreen) vicScreen.classList.add('hidden');
@@ -458,7 +458,7 @@ class GameController {
         document.getElementById('health-value').innerText = this.castle.health;
         document.getElementById('score-value').innerText = this.score;
 
-        // Enable/disable shop buttons
+        // Enable/disable terminal action buttons
         const buyArcherBtn = document.getElementById('buy-archer-btn');
         const buyAxemanBtn = document.getElementById('buy-axeman-btn');
         const buyCrossbowBtn = document.getElementById('buy-crossbow-btn');
@@ -493,7 +493,7 @@ class GameController {
 
     }
 
-    selectShopItem(item) {
+    selectDeploymentItem(item) {
         if (this.gameOver) return;
 
         // Auto deploy to first free slot immediately on clicking button
@@ -1329,11 +1329,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-    // Defenders shop hooks
-    document.getElementById('buy-archer-btn').addEventListener('click', () => game.selectShopItem('archer'));
-    document.getElementById('buy-axeman-btn').addEventListener('click', () => game.selectShopItem('axeman'));
-    document.getElementById('buy-crossbow-btn').addEventListener('click', () => game.selectShopItem('crossbow'));
-    document.getElementById('buy-bomber-btn').addEventListener('click', () => game.selectShopItem('bomber'));
+    // Defenders deployment hooks
+    document.getElementById('buy-archer-btn').addEventListener('click', () => game.selectDeploymentItem('archer'));
+    document.getElementById('buy-axeman-btn').addEventListener('click', () => game.selectDeploymentItem('axeman'));
+    document.getElementById('buy-crossbow-btn').addEventListener('click', () => game.selectDeploymentItem('crossbow'));
+    document.getElementById('buy-bomber-btn').addEventListener('click', () => game.selectDeploymentItem('bomber'));
     
     // Melee Summons hooks
     document.getElementById('spawn-soldier-btn').addEventListener('click', () => game.spawnMeleeAlly('soldier'));
@@ -1341,7 +1341,7 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('spawn-princess-btn').addEventListener('click', () => game.spawnMeleeAlly('princess'));
     
     // Repair hook
-    document.getElementById('repair-castle-btn').addEventListener('click', () => game.selectShopItem('repair'));
+    document.getElementById('repair-castle-btn').addEventListener('click', () => game.selectDeploymentItem('repair'));
 
     // Weather magic hook
     document.getElementById('weather-magic-btn').addEventListener('click', () => game.triggerWeatherMagic());

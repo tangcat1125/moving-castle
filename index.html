@@ -37,48 +37,48 @@
     <!-- Mid-Top Attack HUD (Spawn Allies & Magic) -->
     <div id="attack-panel" class="hud-panel">
         <div class="attack-grid">
-            <button id="spawn-soldier-btn" class="shop-btn" style="border-color: rgba(52, 152, 219, 0.4);">
-                <span class="shop-btn-name">💂 小兵</span>
-                <span class="shop-btn-cost">50💰</span>
+            <button id="spawn-soldier-btn" class="action-btn" style="border-color: rgba(52, 152, 219, 0.4);">
+                <span class="action-btn-name">💂 小兵</span>
+                <span class="action-btn-cost">50💰</span>
             </button>
-            <button id="spawn-general-btn" class="shop-btn" style="border-color: rgba(231, 76, 60, 0.4);">
-                <span class="shop-btn-name">🛡️ 將軍</span>
-                <span class="shop-btn-cost">120💰</span>
+            <button id="spawn-general-btn" class="action-btn" style="border-color: rgba(231, 76, 60, 0.4);">
+                <span class="action-btn-name">🛡️ 將軍</span>
+                <span class="action-btn-cost">120💰</span>
             </button>
-            <button id="spawn-princess-btn" class="shop-btn" style="border-color: rgba(241, 196, 15, 0.4);">
-                <span class="shop-btn-name">👑 姬公主</span>
-                <span class="shop-btn-cost">180💰</span>
+            <button id="spawn-princess-btn" class="action-btn" style="border-color: rgba(241, 196, 15, 0.4);">
+                <span class="action-btn-name">👑 姬公主</span>
+                <span class="action-btn-cost">180💰</span>
             </button>
-            <button id="weather-magic-btn" class="shop-btn" style="border-color: #9b59b6;" disabled>
-                <span class="shop-btn-name">⚡ 廣域魔法</span>
-                <span class="shop-btn-cost" id="weather-kills-count">0/100 💀</span>
+            <button id="weather-magic-btn" class="action-btn" style="border-color: #9b59b6;" disabled>
+                <span class="action-btn-name">⚡ 廣域魔法</span>
+                <span class="action-btn-cost" id="weather-kills-count">0/100 💀</span>
             </button>
         </div>
     </div>
 
-    <!-- Bottom Shop Panel (Defenders & Repair) -->
-    <div id="shop-panel" class="hud-panel">
+    <!-- Bottom Terminal Panel (Defenders & Repair) -->
+    <div id="terminal-panel" class="hud-panel">
         <div class="player-subtitle" style="margin-bottom: 6px; text-align: center; font-weight: 600;">城堡終端機 (最多部署 4 隻甲板防禦)</div>
-        <div class="shop-items">
-            <button id="buy-archer-btn" class="shop-btn">
-                <span class="shop-btn-name">🏹 弓箭</span>
-                <span class="shop-btn-cost">80💰</span>
+        <div class="terminal-items">
+            <button id="buy-archer-btn" class="action-btn">
+                <span class="action-btn-name">🏹 弓箭</span>
+                <span class="action-btn-cost">80💰</span>
             </button>
-            <button id="buy-axeman-btn" class="shop-btn">
-                <span class="shop-btn-name">🪓 擲斧</span>
-                <span class="shop-btn-cost">120💰</span>
+            <button id="buy-axeman-btn" class="action-btn">
+                <span class="action-btn-name">🪓 擲斧</span>
+                <span class="action-btn-cost">120💰</span>
             </button>
-            <button id="buy-crossbow-btn" class="shop-btn">
-                <span class="shop-btn-name">⚙️ 連弩</span>
-                <span class="shop-btn-cost">150💰</span>
+            <button id="buy-crossbow-btn" class="action-btn">
+                <span class="action-btn-name">⚙️ 連弩</span>
+                <span class="action-btn-cost">150💰</span>
             </button>
-            <button id="buy-bomber-btn" class="shop-btn">
-                <span class="shop-btn-name">💣 擲彈</span>
-                <span class="shop-btn-cost">180💰</span>
+            <button id="buy-bomber-btn" class="action-btn">
+                <span class="action-btn-name">💣 擲彈</span>
+                <span class="action-btn-cost">180💰</span>
             </button>
-            <button id="repair-castle-btn" class="shop-btn" style="border-color: rgba(46, 204, 113, 0.4);">
-                <span class="shop-btn-name">🔧 修復</span>
-                <span class="shop-btn-cost">50💰</span>
+            <button id="repair-castle-btn" class="action-btn" style="border-color: rgba(46, 204, 113, 0.4);">
+                <span class="action-btn-name">🔧 修復</span>
+                <span class="action-btn-cost">50💰</span>
             </button>
         </div>
     </div>
@@ -114,7 +114,7 @@
         <h1 class="title-glow">Moving Castle</h1>
         <p class="subtitle">守住城堡，管理卡牌與戰線，撐過一波又一波的攻勢。</p>
         <button id="start-btn" class="primary-btn">開始遊戲</button>
-        <div class="start-footer">WASD 移動，商店點一下即可購買。</div>
+        <div class="start-footer">WASD 移動，終端機點一下即可購買。</div>
     </div>
 
     <div id="gameover-screen" class="screen-overlay hidden">
