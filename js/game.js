@@ -62,6 +62,83 @@ class GameController {
 
         // Mobile Joystick
         this.joystickVector = { x: 0, y: 0 };
+
+        // HUD card deck
+        this.shopOpen = false;
+        this.deckCards = [
+            {
+                id: 'archer',
+                name: '弓箭手',
+                role: 'Utility',
+                cost: 80,
+                description: '遠程壓制，前期最穩定的輸出卡。',
+                tags: ['普通', 'utility'],
+                accent: '#f39c12',
+            },
+            {
+                id: 'axeman',
+                name: '斧兵',
+                role: 'Attack',
+                cost: 120,
+                description: '近戰突破，適合快速清線與拆壓。',
+                tags: ['普通', 'attack'],
+                accent: '#e74c3c',
+            },
+            {
+                id: 'crossbow',
+                name: '弩兵',
+                role: 'Defense',
+                cost: 150,
+                description: '高穿透射擊，能有效壓制厚血單位。',
+                tags: ['普通', 'defense'],
+                accent: '#3498db',
+            },
+            {
+                id: 'bomber',
+                name: '炸彈兵',
+                role: 'Defense',
+                cost: 180,
+                description: '範圍爆破卡，適合在敵潮密集時翻盤。',
+                tags: ['普通', 'defense'],
+                accent: '#9b59b6',
+            },
+            {
+                id: 'soldier',
+                name: '士兵',
+                role: 'Support',
+                cost: 50,
+                description: '便宜前排，能幫你穩住整條戰線。',
+                tags: ['召喚', 'support'],
+                accent: '#2ecc71',
+            },
+            {
+                id: 'general',
+                name: '將軍',
+                role: 'Support',
+                cost: 120,
+                description: '高價值支援卡，適合中期強勢推進。',
+                tags: ['召喚', 'support'],
+                accent: '#c0392b',
+            },
+            {
+                id: 'princess',
+                name: '公主',
+                role: 'Support',
+                cost: 180,
+                description: '後排增益與續航核心，撐場面很重要。',
+                tags: ['召喚', 'support'],
+                accent: '#f1c40f',
+            },
+            {
+                id: 'repair',
+                name: '修復城堡',
+                role: 'Utility',
+                cost: 50,
+                description: '回復城堡生命，為下一波爭取時間。',
+                tags: ['回復', 'utility'],
+                accent: '#95a5a6',
+            }
+        ];
     }
 
     init() {
@@ -137,6 +214,7 @@ class GameController {
         // Setup Direct Canvas Touch Controls
         this.setupDirectCanvasTouch();
 
+        this.renderDeckCards();
         this.updateHUD();
         this.animate();
     }
@@ -372,6 +450,7 @@ class GameController {
         this.castleFrozenTimer = 0;
         this.cameraShakeTimer = 0;
         this.dragonComboTimer = 0;
+        this.closeShopModal();
 
         // Reset mobile joystick state
         if (this.joystickVector) {
@@ -490,23 +569,41 @@ class GameController {
             weatherBtn.disabled = this.totalKills < 100 || this.gameOver || !this.gameStarted;
         }
 
-        // Mobile Shop Buttons Update
-        const upAttackBtn = document.getElementById('mobile-up-attack-btn');
-        const downDefenseBtn = document.getElementById('mobile-down-defense-btn');
-        if (upAttackBtn) {
-            const upCost = this.gold >= 120 ? 120 : 80;
-            const upName = this.gold >= 120 ? "⚔️ 上攻 (擲斧)" : "⚔️ 上攻 (弓箭)";
-            upAttackBtn.querySelector('.shop-btn-name').innerText = upName;
-            document.getElementById('up-attack-cost-text').innerText = `${upCost}💰`;
-            upAttackBtn.disabled = this.gold < 80 || limitReached;
-        }
-        if (downDefenseBtn) {
-            const downCost = this.gold >= 180 ? 180 : 150;
-            const downName = this.gold >= 180 ? "🛡️ 下防 (擲彈)" : "🛡️ 下防 (連弩)";
-            downDefenseBtn.querySelector('.shop-btn-name').innerText = downName;
-            document.getElementById('down-defense-cost-text').innerText = `${downCost}💰`;
-            downDefenseBtn.disabled = this.gold < 150 || limitReached;
-        }
+    }
+
+    renderDeckCards() {
+        const deckCards = document.getElementById('deck-cards');
+        if (!deckCards) return;
+
+        deckCards.innerHTML = '';
+        this.deckCards.forEach(card => {
+            const cardEl = document.createElement('article');
+            cardEl.className = 'deck-card';
+            cardEl.style.setProperty('--card-accent', card.accent);
+            cardEl.innerHTML = `
+                <div class="deck-card-name">${card.name}</div>
+                <div class="deck-card-meta">${card.role} / Cost ${card.cost}</div>
+                <div class="deck-card-desc">${card.description}</div>
+                <div class="deck-card-tags">
+                    ${card.tags.map(tag => `<span class="deck-tag">${tag}</span>`).join('')}
+                </div>
+            `;
+            deckCards.appendChild(cardEl);
+        });
+    }
+
+    toggleShopModal(forceOpen = null) {
+        const modal = document.getElementById('shop-modal');
+        if (!modal) return;
+
+        const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !this.shopOpen;
+        this.shopOpen = shouldOpen;
+        modal.classList.toggle('open', shouldOpen);
+        modal.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
+    }
+
+    closeShopModal() {
+        this.toggleShopModal(false);
     }
 
     selectShopItem(item) {
@@ -546,6 +643,7 @@ class GameController {
             }
         }
         this.updateHUD();
+        this.closeShopModal();
     }
 
     spawnMeleeAlly(type) {
@@ -1342,28 +1440,12 @@ window.addEventListener('DOMContentLoaded', () => {
         document.getElementById('victory-screen').classList.add('hidden');
         game.startNewGame();
     });
-    
+
     // Defenders shop hooks
     document.getElementById('buy-archer-btn').addEventListener('click', () => game.selectShopItem('archer'));
     document.getElementById('buy-axeman-btn').addEventListener('click', () => game.selectShopItem('axeman'));
     document.getElementById('buy-crossbow-btn').addEventListener('click', () => game.selectShopItem('crossbow'));
     document.getElementById('buy-bomber-btn').addEventListener('click', () => game.selectShopItem('bomber'));
-    
-    // Mobile Shop hooks
-    document.getElementById('mobile-up-attack-btn').addEventListener('click', () => {
-        if (game.gold >= 120 && game.defenders.length < 4) {
-            game.selectShopItem('axeman');
-        } else if (game.gold >= 80 && game.defenders.length < 4) {
-            game.selectShopItem('archer');
-        }
-    });
-    document.getElementById('mobile-down-defense-btn').addEventListener('click', () => {
-        if (game.gold >= 180 && game.defenders.length < 4) {
-            game.selectShopItem('bomber');
-        } else if (game.gold >= 150 && game.defenders.length < 4) {
-            game.selectShopItem('crossbow');
-        }
-    });
     
     // Melee Summons hooks
     document.getElementById('spawn-soldier-btn').addEventListener('click', () => game.spawnMeleeAlly('soldier'));
