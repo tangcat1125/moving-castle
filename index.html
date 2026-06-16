@@ -16,86 +16,84 @@
         <div id="deck-cards" class="deck-cards"></div>
     </div>
 
-    <!-- Right: player info & Attack Shop -->
+    <!-- Top HUD: Player stats, control buttons, and Attack actions -->
     <div id="top-hud" class="hud-panel player-panel">
-        <div class="player-header">
-            <div class="player-name">你 / P1</div>
-            <div class="player-subtitle">玩家資訊</div>
-        </div>
-        <div class="hud-grid">
-            <div class="hud-item">
-                <span class="hud-label">金錢</span>
-                <span id="gold-value" class="hud-value">200</span>
+        <div class="hud-header-row">
+            <div class="hud-stats-container">
+                <div class="hud-item">
+                    <span class="hud-label">黃金</span>
+                    <span id="gold-value" class="hud-value">300</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">波次</span>
+                    <span id="wave-value" class="hud-value">1</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">城堡血量</span>
+                    <span id="health-value" class="hud-value">500</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">分數</span>
+                    <span id="score-value" class="hud-value">0</span>
+                </div>
             </div>
-            <div class="hud-item">
-                <span class="hud-label">波次</span>
-                <span id="wave-value" class="hud-value">1</span>
-            </div>
-            <div class="hud-item">
-                <span class="hud-label">城堡血量</span>
-                <span id="health-value" class="hud-value">500</span>
-            </div>
-            <div class="hud-item">
-                <span class="hud-label">分數</span>
-                <span id="score-value" class="hud-value">0</span>
+            <div class="hud-controls-container">
+                <button id="music-btn" class="control-btn">🔊 音樂: 開</button>
+                <button id="fullscreen-btn" class="control-btn">📺 全螢幕</button>
             </div>
         </div>
         
-        <div class="attack-header" style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px; margin-bottom: 6px;">
-            <div class="player-subtitle">⚔️ 上攻 (召喚英雄與雷擊)</div>
-        </div>
-        <div class="attack-grid">
-            <button id="spawn-soldier-btn" class="shop-btn" style="border-color: rgba(52, 152, 219, 0.4);">
-                <span class="shop-btn-name">💂 小兵</span>
-                <span class="shop-btn-cost">50💰</span>
-            </button>
-            <button id="spawn-general-btn" class="shop-btn" style="border-color: rgba(231, 76, 60, 0.4);">
-                <span class="shop-btn-name">🛡️ 將軍</span>
-                <span class="shop-btn-cost">120💰</span>
-            </button>
-            <button id="spawn-princess-btn" class="shop-btn" style="border-color: rgba(241, 196, 15, 0.4);">
-                <span class="shop-btn-name">👑 公主</span>
-                <span class="shop-btn-cost">180💰</span>
-            </button>
-            <button id="weather-magic-btn" class="shop-btn" style="border-color: #9b59b6;" disabled>
-                <span class="shop-btn-name">⚡ 雷擊</span>
-                <span class="shop-btn-cost" id="weather-kills-count">0/100 💀</span>
-            </button>
+        <div class="attack-shop-row">
+            <span class="shop-title-tag">⚔️ 上攻</span>
+            <div class="attack-grid">
+                <button id="spawn-soldier-btn" class="shop-btn" style="border-color: rgba(52, 152, 219, 0.4);">
+                    <span class="shop-btn-name">💂 小兵</span>
+                    <span class="shop-btn-cost">50💰</span>
+                </button>
+                <button id="spawn-general-btn" class="shop-btn" style="border-color: rgba(231, 76, 60, 0.4);">
+                    <span class="shop-btn-name">🛡️ 將軍</span>
+                    <span class="shop-btn-cost">120💰</span>
+                </button>
+                <button id="spawn-princess-btn" class="shop-btn" style="border-color: rgba(241, 196, 15, 0.4);">
+                    <span class="shop-btn-name">👑 公主</span>
+                    <span class="shop-btn-cost">180💰</span>
+                </button>
+                <button id="weather-magic-btn" class="shop-btn" style="border-color: #9b59b6;" disabled>
+                    <span class="shop-btn-name">⚡ 雷擊</span>
+                    <span class="shop-btn-cost" id="weather-kills-count">0/100 💀</span>
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- Bottom Shop Panel (Defenders & Repair) -->
     <div id="shop-panel" class="hud-panel">
-        <div class="player-subtitle" style="margin-bottom: 6px; text-align: center;">🛡️ 下防 (甲板防禦與修復)</div>
-        <div class="shop-items">
-            <button id="buy-archer-btn" class="shop-btn">
-                <span class="shop-btn-name">🏹 弓箭手</span>
-                <span class="shop-btn-cost">80💰</span>
-            </button>
-            <button id="buy-axeman-btn" class="shop-btn">
-                <span class="shop-btn-name">🪓 擲斧手</span>
-                <span class="shop-btn-cost">120💰</span>
-            </button>
-            <button id="buy-crossbow-btn" class="shop-btn">
-                <span class="shop-btn-name">⚙️ 連弩車</span>
-                <span class="shop-btn-cost">150💰</span>
-            </button>
-            <button id="buy-bomber-btn" class="shop-btn">
-                <span class="shop-btn-name">💣 擲彈手</span>
-                <span class="shop-btn-cost">180💰</span>
-            </button>
-            <button id="repair-castle-btn" class="shop-btn" style="border-color: rgba(46, 204, 113, 0.4);">
-                <span class="shop-btn-name">🔧 修復</span>
-                <span class="shop-btn-cost">50💰</span>
-            </button>
+        <div class="shop-items-container">
+            <span class="shop-title-tag">🛡️ 下防</span>
+            <div class="shop-items">
+                <button id="buy-archer-btn" class="shop-btn">
+                    <span class="shop-btn-name">🏹 弓箭手</span>
+                    <span class="shop-btn-cost">80💰</span>
+                </button>
+                <button id="buy-axeman-btn" class="shop-btn">
+                    <span class="shop-btn-name">🪓 擲斧手</span>
+                    <span class="shop-btn-cost">120💰</span>
+                </button>
+                <button id="buy-crossbow-btn" class="shop-btn">
+                    <span class="shop-btn-name">⚙️ 連弩車</span>
+                    <span class="shop-btn-cost">150💰</span>
+                </button>
+                <button id="buy-bomber-btn" class="shop-btn">
+                    <span class="shop-btn-name">💣 擲彈手</span>
+                    <span class="shop-btn-cost">180💰</span>
+                </button>
+                <button id="repair-castle-btn" class="shop-btn" style="border-color: rgba(46, 204, 113, 0.4);">
+                    <span class="shop-btn-name">🔧 修復</span>
+                    <span class="shop-btn-cost">50💰</span>
+                </button>
+            </div>
         </div>
     </div>
-
-    <!-- Music Control Button -->
-    <button id="music-btn" class="hud-panel">🔊 音樂: 開</button>
-
-    <!-- Fullscreen Toggle Button -->
-    <button id="fullscreen-btn" class="hud-panel">📺 全螢幕</button>
 
     <!-- Minimap Radar -->
     <div id="minimap" class="hud-panel hidden">
