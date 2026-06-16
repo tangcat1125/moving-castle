@@ -15,16 +15,11 @@
         <div id="deck-cards" class="deck-cards"></div>
     </div>
 
-    <button id="shop-launcher" class="hud-panel shop-launcher" type="button" aria-label="打開卡牌商店">+</button>
-
+    <!-- Top Stats HUD (Only stats) -->
     <div id="top-hud" class="hud-panel player-panel">
-        <div class="player-header">
-            <div class="player-name">你 / P1</div>
-            <div class="player-subtitle">玩家資訊</div>
-        </div>
-        <div class="hud-grid">
+        <div class="hud-stats-container">
             <div class="hud-item">
-                <span class="hud-label">金錢</span>
+                <span class="hud-label">黃金</span>
                 <span id="gold-value" class="hud-value">300</span>
             </div>
             <div class="hud-item">
@@ -42,83 +37,74 @@
         </div>
     </div>
 
-    <button id="music-btn" class="hud-panel">音樂：開</button>
-    <button id="fullscreen-btn" class="hud-panel">全螢幕</button>
+    <!-- Mid-Top Attack HUD (Spawn Allies & Magic) -->
+    <div id="attack-panel" class="hud-panel">
+        <div class="attack-grid">
+            <button id="spawn-soldier-btn" class="shop-btn" style="border-color: rgba(52, 152, 219, 0.4);">
+                <span class="shop-btn-name">💂 小兵</span>
+                <span class="shop-btn-cost">50💰</span>
+            </button>
+            <button id="spawn-general-btn" class="shop-btn" style="border-color: rgba(231, 76, 60, 0.4);">
+                <span class="shop-btn-name">🛡️ 將軍</span>
+                <span class="shop-btn-cost">120💰</span>
+            </button>
+            <button id="spawn-princess-btn" class="shop-btn" style="border-color: rgba(241, 196, 15, 0.4);">
+                <span class="shop-btn-name">👑 姬公主</span>
+                <span class="shop-btn-cost">180💰</span>
+            </button>
+            <button id="weather-magic-btn" class="shop-btn" style="border-color: #9b59b6;" disabled>
+                <span class="shop-btn-name">⚡ 廣域魔法</span>
+                <span class="shop-btn-cost" id="weather-kills-count">0/100 💀</span>
+            </button>
+        </div>
+    </div>
 
+    <!-- Bottom Shop Panel (Defenders & Repair) -->
+    <div id="shop-panel" class="hud-panel">
+        <div class="player-subtitle" style="margin-bottom: 6px; text-align: center; font-weight: 600;">城堡終端機 (最多部署 4 隻甲板防禦)</div>
+        <div class="shop-items">
+            <button id="buy-archer-btn" class="shop-btn">
+                <span class="shop-btn-name">🏹 弓箭</span>
+                <span class="shop-btn-cost">80💰</span>
+            </button>
+            <button id="buy-axeman-btn" class="shop-btn">
+                <span class="shop-btn-name">🪓 擲斧</span>
+                <span class="shop-btn-cost">120💰</span>
+            </button>
+            <button id="buy-crossbow-btn" class="shop-btn">
+                <span class="shop-btn-name">⚙️ 連弩</span>
+                <span class="shop-btn-cost">150💰</span>
+            </button>
+            <button id="buy-bomber-btn" class="shop-btn">
+                <span class="shop-btn-name">💣 擲彈</span>
+                <span class="shop-btn-cost">180💰</span>
+            </button>
+            <button id="repair-castle-btn" class="shop-btn" style="border-color: rgba(46, 204, 113, 0.4);">
+                <span class="shop-btn-name">🔧 修復</span>
+                <span class="shop-btn-cost">50💰</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Music Control Button -->
+    <button id="music-btn" class="hud-panel">🔊 音樂：開</button>
+
+    <!-- Fullscreen Toggle Button -->
+    <button id="fullscreen-btn" class="hud-panel">📺 全螢幕</button>
+
+    <!-- Minimap Radar -->
     <div id="minimap" class="hud-panel hidden">
         <div class="radar-grid"></div>
         <div class="radar-blip castle-blip">🏰</div>
-        <span class="radar-label">戰場雷達</span>
+        <span class="radar-label">魔龍雷達</span>
     </div>
 
+    <!-- Instructions Panel -->
     <div id="instruction-overlay" class="hud-panel">
-        <h3>移動城堡操作說明</h3>
-        <p>1. 使用 <strong>W / A / S / D</strong> 移動城堡。</p>
-        <p>2. 點擊上方的 <strong>+</strong> 可打開卡牌商店，購買既有卡牌。</p>
-        <p>3. 左側顯示你的手牌，現在只保留實際存在的卡牌，不再放空卡。</p>
-        <p>4. 右側是玩家資訊，商店與資訊已重新分區。</p>
-    </div>
-
-    <div id="shop-modal" class="shop-modal" aria-hidden="true">
-        <div class="shop-modal-backdrop" data-close-shop></div>
-        <div class="shop-modal-shell hud-panel">
-            <div class="shop-modal-header">
-                <div>
-                    <div class="shop-title">卡牌商店</div>
-                    <div class="shop-modal-subtitle">點一下就能購買，商店會以浮動視窗方式打開。</div>
-                </div>
-                <button id="shop-modal-close" class="shop-modal-close" type="button" aria-label="關閉商店">×</button>
-            </div>
-            <div class="shop-items shop-items-grid">
-                <button id="buy-archer-btn" class="shop-btn">
-                    <span class="shop-btn-name">弓箭手</span>
-                    <span class="shop-btn-cost">80 金</span>
-                </button>
-                <button id="buy-axeman-btn" class="shop-btn">
-                    <span class="shop-btn-name">斧兵</span>
-                    <span class="shop-btn-cost">120 金</span>
-                </button>
-                <button id="buy-crossbow-btn" class="shop-btn">
-                    <span class="shop-btn-name">弩兵</span>
-                    <span class="shop-btn-cost">150 金</span>
-                </button>
-                <button id="buy-bomber-btn" class="shop-btn">
-                    <span class="shop-btn-name">炸彈兵</span>
-                    <span class="shop-btn-cost">180 金</span>
-                </button>
-
-                <button id="mobile-up-attack-btn" class="shop-btn mobile-only-btn" style="border-color: rgba(230, 126, 34, 0.6);">
-                    <span class="shop-btn-name">上方攻擊卡</span>
-                    <span class="shop-btn-cost" id="up-attack-cost-text">80 金</span>
-                </button>
-                <button id="mobile-down-defense-btn" class="shop-btn mobile-only-btn" style="border-color: rgba(46, 204, 113, 0.6);">
-                    <span class="shop-btn-name">下方防禦卡</span>
-                    <span class="shop-btn-cost" id="down-defense-cost-text">150 金</span>
-                </button>
-
-                <button id="spawn-soldier-btn" class="shop-btn" style="border-color: rgba(52, 152, 219, 0.4);">
-                    <span class="shop-btn-name">士兵</span>
-                    <span class="shop-btn-cost">50 金</span>
-                </button>
-                <button id="spawn-general-btn" class="shop-btn" style="border-color: rgba(231, 76, 60, 0.4);">
-                    <span class="shop-btn-name">將軍</span>
-                    <span class="shop-btn-cost">120 金</span>
-                </button>
-                <button id="spawn-princess-btn" class="shop-btn" style="border-color: rgba(241, 196, 15, 0.4);">
-                    <span class="shop-btn-name">公主</span>
-                    <span class="shop-btn-cost">180 金</span>
-                </button>
-
-                <button id="repair-castle-btn" class="shop-btn">
-                    <span class="shop-btn-name">修復城堡</span>
-                    <span class="shop-btn-cost">50 金</span>
-                </button>
-                <button id="weather-magic-btn" class="shop-btn" style="border-color: #9b59b6;" disabled>
-                    <span class="shop-btn-name">天氣魔法</span>
-                    <span class="shop-btn-cost" id="weather-kills-count">0/100 擊殺</span>
-                </button>
-            </div>
-        </div>
+        <h3>🌵 移動城堡防線</h3>
+        <p>1. 使用 **方向鍵 ◀ ▶ ▲ ▼** 或 **WASD** 移動城堡。</p>
+        <p>2. 上方為「⚔️ 上攻」召喚英雄，下方為「🛡️ 下防」部署防禦與修復。</p>
+        <p>3. 購買「防禦者」（弓箭、擲斧、連弩、擲彈）自動部署至城堡甲板空槽。</p>
     </div>
 
     <div id="joystick-container">

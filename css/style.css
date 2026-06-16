@@ -40,82 +40,47 @@ body, html {
 }
 
 #top-hud {
+    position: absolute;
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    width: min(760px, 95%);
+    width: min(380px, 95%);
     display: flex;
     flex-direction: column;
-    gap: 12px;
     align-items: stretch;
+    z-index: 10;
 }
 
 .player-panel {
-    padding: 12px 16px;
-}
-
-.hud-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    padding-bottom: 8px;
+    padding: 10px 16px;
 }
 
 .hud-stats-container {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    flex: 1;
-}
-
-.hud-controls-container {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
     gap: 8px;
-    align-items: center;
+    width: 100%;
+    text-align: center;
 }
 
-.control-btn {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    color: #fff;
-    padding: 6px 12px;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.control-btn:hover {
-    background: rgba(255, 255, 255, 0.18);
-    border-color: rgba(255, 255, 255, 0.3);
-}
-
-.attack-shop-row {
+#attack-panel {
+    position: absolute;
+    top: 105px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(380px, 95%);
     display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.shop-title-tag {
-    font-size: 0.8rem;
-    font-weight: 800;
-    color: #c5a880;
-    letter-spacing: 1px;
-    white-space: nowrap;
-    text-transform: uppercase;
-    min-width: 60px;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 10px 14px;
+    z-index: 10;
 }
 
 .attack-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
-    flex: 1;
+    width: 100%;
 }
 
 #deck-panel {
@@ -321,27 +286,22 @@ body, html {
 
 /* Shop Menu Panel */
 #shop-panel {
+    position: absolute;
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
-    width: 90%;
-    max-width: 760px;
+    width: min(500px, 95%);
     display: flex;
     flex-direction: column;
-    gap: 12px;
-}
-
-.shop-items-container {
-    display: flex;
-    align-items: center;
-    gap: 16px;
+    gap: 8px;
+    z-index: 10;
 }
 
 .shop-items {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 8px;
-    flex: 1;
+    width: 100%;
 }
 
 .shop-btn {
@@ -628,34 +588,6 @@ body, html {
 
 /* Mobile Layout Media Queries */
 @media (max-width: 820px) {
-    #deck-panel {
-        top: 10px;
-        left: 10px;
-        width: calc(100vw - 90px);
-        gap: 8px;
-    }
-    .deck-cards {
-        gap: 8px;
-    }
-    .deck-card {
-        min-width: 136px;
-        padding: 10px;
-    }
-    #shop-launcher {
-        top: 12px;
-        width: 48px;
-        height: 48px;
-        font-size: 1.6rem;
-    }
-    .shop-modal-shell {
-        top: 72px;
-        width: calc(100vw - 16px);
-        max-height: calc(100vh - 90px);
-        padding: 14px;
-    }
-    .shop-items-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
     .hud-label {
         font-size: 0.6rem;
         letter-spacing: 0.5px;
@@ -663,9 +595,6 @@ body, html {
     .hud-value {
         font-size: 0.95rem;
         font-weight: 800;
-    }
-    .shop-title {
-        font-size: 0.75rem;
     }
     .shop-btn {
         padding: 6px 4px;
@@ -683,25 +612,19 @@ body, html {
         display: none !important; /* Hide keyboard instructions, deck cards, and joystick on mobile screen sizes */
     }
     #top-hud {
-        gap: 8px;
-        padding: 8px 10px;
+        gap: 4px;
+        padding: 6px 10px;
         top: 10px;
         left: 50%;
         transform: translateX(-50%);
-        width: 95%;
-        max-width: 450px;
+        width: calc(100vw - 120px);
+        max-width: 250px;
         right: unset;
-    }
-    .hud-header-row {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 8px;
-        padding-bottom: 6px;
     }
     .hud-stats-container {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 6px;
+        gap: 4px;
         width: 100%;
     }
     .hud-item {
@@ -713,31 +636,13 @@ body, html {
         flex-direction: column;
         align-items: center;
     }
-    .hud-controls-container {
-        display: flex;
-        justify-content: space-between;
-        gap: 6px;
-        width: 100%;
-    }
-    .hud-controls-container .control-btn {
-        font-size: 0.7rem;
-        padding: 5px 10px;
-        flex: 1;
-        text-align: center;
-        border-radius: 6px;
-    }
-    .attack-shop-row {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 6px;
-    }
-    .shop-title-tag {
-        font-size: 0.7rem;
-        text-align: center;
-        min-width: unset;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        padding-bottom: 4px;
-        margin-bottom: 2px;
+    #attack-panel {
+        top: 72px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100vw - 120px);
+        max-width: 250px;
+        padding: 6px 10px;
     }
     .attack-grid {
         grid-template-columns: repeat(4, 1fr);
@@ -753,6 +658,28 @@ body, html {
     .attack-grid .shop-btn-cost {
         font-size: 0.6rem;
     }
+    #music-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 85px;
+        padding: 6px 4px;
+        font-size: 0.7rem;
+        border-radius: 8px;
+        z-index: 15;
+        text-align: center;
+    }
+    #fullscreen-btn {
+        position: absolute;
+        top: 48px;
+        right: 10px;
+        width: 85px;
+        padding: 6px 4px;
+        font-size: 0.7rem;
+        border-radius: 8px;
+        z-index: 15;
+        text-align: center;
+    }
     #shop-panel {
         width: 95%;
         max-width: 450px;
@@ -760,11 +687,6 @@ body, html {
         bottom: 10px;
         left: 50%;
         transform: translateX(-50%);
-        gap: 4px;
-    }
-    .shop-items-container {
-        flex-direction: column;
-        align-items: stretch;
         gap: 4px;
     }
     .shop-items {
