@@ -489,6 +489,24 @@ class GameController {
         if (weatherBtn) {
             weatherBtn.disabled = this.totalKills < 100 || this.gameOver || !this.gameStarted;
         }
+
+        // Mobile Shop Buttons Update
+        const upAttackBtn = document.getElementById('mobile-up-attack-btn');
+        const downDefenseBtn = document.getElementById('mobile-down-defense-btn');
+        if (upAttackBtn) {
+            const upCost = this.gold >= 120 ? 120 : 80;
+            const upName = this.gold >= 120 ? "⚔️ 上攻 (擲斧)" : "⚔️ 上攻 (弓箭)";
+            upAttackBtn.querySelector('.shop-btn-name').innerText = upName;
+            document.getElementById('up-attack-cost-text').innerText = `${upCost}💰`;
+            upAttackBtn.disabled = this.gold < 80 || limitReached;
+        }
+        if (downDefenseBtn) {
+            const downCost = this.gold >= 180 ? 180 : 150;
+            const downName = this.gold >= 180 ? "🛡️ 下防 (擲彈)" : "🛡️ 下防 (連弩)";
+            downDefenseBtn.querySelector('.shop-btn-name').innerText = downName;
+            document.getElementById('down-defense-cost-text').innerText = `${downCost}💰`;
+            downDefenseBtn.disabled = this.gold < 150 || limitReached;
+        }
     }
 
     selectShopItem(item) {
@@ -696,6 +714,7 @@ class GameController {
 
         // Check for small monster merging
         this.checkEnemyMerging();
+        this.checkDragonMerging();
 
         // 3. Update Enemies
         for (let i = this.enemies.length - 1; i >= 0; i--) {
@@ -717,8 +736,7 @@ class GameController {
             // Check if reached castle
             let colDist = 2.5;
             if (enemy.type === 'dragon') {
-                const mult = enemy.waveNum === 3 ? 2.0 : (enemy.waveNum === 2 ? 1.5 : 1.0);
-                colDist = 2.5 * mult;
+                colDist = 2.5 * enemy.scaleMult;
             } else if (enemy.isMergedGiant) {
                 colDist = 2.5 * 1.8;
             }
@@ -807,10 +825,11 @@ class GameController {
         // 7. Raycast detection for slot hover highlighting
         this.handleRaycast();
 
-        // 8. Wave 3 Dragon Combo Skill: "滅世火雨"
-        if (this.wave === 3 && this.bossActive) {
+        // 8. Wave 2/3 Dragon Combo Skill: "滅世火雨"
+        if (this.wave >= 2 && this.bossActive) {
             const activeDragons = this.enemies.filter(e => e.active && e.type === 'dragon');
-            if (activeDragons.length >= 2) {
+            const totalDragonCount = activeDragons.reduce((sum, d) => sum + (d.dragonMergeCount || 1), 0);
+            if (totalDragonCount >= 2) {
                 if (this.dragonComboTimer === undefined) this.dragonComboTimer = 0;
                 this.dragonComboTimer += deltaTime * 1000;
                 if (this.dragonComboTimer >= 8000) { // every 8 seconds
@@ -891,7 +910,7 @@ class GameController {
     }
 
     spawnBossDragon() {
-        const numDragons = this.wave === 3 ? 3 : 1;
+        const numDragons = this.wave === 2 ? 2 : (this.wave === 3 ? 3 : 1);
         for (let i = 0; i < numDragons; i++) {
             const enemy = new BossDragon(this.scene, this.wave);
             const angle = (Math.random() * Math.PI * 2) + (i * Math.PI * 2 / numDragons);
@@ -1056,6 +1075,73 @@ class GameController {
                 
                 // Break out of the loop so we don't process other merges this frame
                 break;
+            }
+        }
+    }
+
+    checkDragonMerging() {
+        const activeDragons = this.enemies.filter(e => e.active && e.type === 'dragon');
+        for (let i = 0; i < activeDragons.length; i++) {
+            const d1 = activeDragons[i];
+            for (let j = i + 1; j < activeDragons.length; j++) {
+                const d2 = activeDragons[j];
+                const dist = d1.mesh.position.distanceTo(d2.mesh.position);
+                
+                // If they are within 6.0 units, they merge (since they are big)
+                if (dist <= 6.0) {
+                    // Merging d2 into d1
+                    d2.active = false;
+                    d2.destroy();
+                    
+                    const originalMergeCount = d1.dragonMergeCount || 1;
+                    const incomingMergeCount = d2.dragonMergeCount || 1;
+                    d1.dragonMergeCount = originalMergeCount + incomingMergeCount;
+                    
+                    // Combine health
+                    d1.maxHealth = d1.maxHealth + d2.maxHealth;
+                    d1.health = d1.health + d2.health;
+                    
+                    // Combine stats and scale based on new merge count
+                    // "攻擊力倍數，當兩隻或三隻魔龍組合變大後，攻擊力倍增"
+                    if (d1.dragonMergeCount === 2) {
+                        d1.scaleMult = d1.scaleMult * 1.5;
+                        d1.damage *= 2; // 2x damage for 2-dragon fusion
+                        d1.speed *= 1.1;
+                        
+                        // Show warning banner
+                        const alertDiv = document.createElement('div');
+                        alertDiv.innerText = "🔥 警告：兩隻魔龍合體變大！攻擊力與體型加倍！";
+                        alertDiv.style.cssText = "position:absolute; top:130px; left:50%; transform:translateX(-50%); color:#e67e22; font-size:1.8rem; font-weight:800; z-index:99; background:rgba(0,0,0,0.85); padding:10px 30px; border-radius:10px; border:2px solid #e67e22; text-shadow: 0 0 10px rgba(230,126,34,0.5);";
+                        document.body.appendChild(alertDiv);
+                        setTimeout(() => alertDiv.remove(), 4000);
+                    } else if (d1.dragonMergeCount >= 3) {
+                        d1.scaleMult = d1.scaleMult * 2.0;
+                        d1.damage *= 3; // 3x damage for 3-dragon fusion
+                        d1.speed *= 1.2;
+                        
+                        // Show warning banner
+                        const alertDiv = document.createElement('div');
+                        alertDiv.innerText = "🔥 警告：三隻魔龍終極合體！化身為超巨型滅世魔龍，攻擊力倍增！";
+                        alertDiv.style.cssText = "position:absolute; top:130px; left:50%; transform:translateX(-50%); color:red; font-size:1.8rem; font-weight:800; z-index:99; background:rgba(0,0,0,0.85); padding:10px 30px; border-radius:10px; border:2px solid red; text-shadow: 0 0 10px rgba(255,0,0,0.5);";
+                        document.body.appendChild(alertDiv);
+                        setTimeout(() => alertDiv.remove(), 4000);
+                    }
+                    
+                    // Update scale mesh and health bar position
+                    if (d1.cardMesh) {
+                        d1.cardMesh.scale.set(d1.scaleMult, d1.scaleMult, 1);
+                    }
+                    if (d1.healthBar) {
+                        const baseScale = 2.2;
+                        d1.healthBar.position.y = 1.8 * baseScale * d1.scaleMult;
+                    }
+                    d1.updateHealthBar();
+                    
+                    // Blast visual feedback
+                    this.spawnExplosionEffect(d1.mesh.position, 2.5);
+                    
+                    break; // break outer loop to process one merge at a time per frame
+                }
             }
         }
     }
@@ -1262,6 +1348,22 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('buy-axeman-btn').addEventListener('click', () => game.selectShopItem('axeman'));
     document.getElementById('buy-crossbow-btn').addEventListener('click', () => game.selectShopItem('crossbow'));
     document.getElementById('buy-bomber-btn').addEventListener('click', () => game.selectShopItem('bomber'));
+    
+    // Mobile Shop hooks
+    document.getElementById('mobile-up-attack-btn').addEventListener('click', () => {
+        if (game.gold >= 120 && game.defenders.length < 4) {
+            game.selectShopItem('axeman');
+        } else if (game.gold >= 80 && game.defenders.length < 4) {
+            game.selectShopItem('archer');
+        }
+    });
+    document.getElementById('mobile-down-defense-btn').addEventListener('click', () => {
+        if (game.gold >= 180 && game.defenders.length < 4) {
+            game.selectShopItem('bomber');
+        } else if (game.gold >= 150 && game.defenders.length < 4) {
+            game.selectShopItem('crossbow');
+        }
+    });
     
     // Melee Summons hooks
     document.getElementById('spawn-soldier-btn').addEventListener('click', () => game.spawnMeleeAlly('soldier'));

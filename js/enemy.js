@@ -6,6 +6,7 @@ class Enemy {
         this.spawnTime = Date.now();
         this.isMergedGiant = false;
         this.scaleMult = 1.0;
+        this.dragonMergeCount = 1;
         
         // Define stats based on type
         if (type === 'fast') {

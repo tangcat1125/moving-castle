@@ -144,6 +144,10 @@ body, html {
     font-weight: 600;
 }
 
+.mobile-only-btn {
+    display: none;
+}
+
 /* Instruction Overlays */
 #instruction-overlay {
     position: absolute;
@@ -430,8 +434,19 @@ body, html {
     #instruction-overlay {
         display: none !important; /* Hide keyboard controls on mobile screen sizes */
     }
-    #joystick-container {
-        display: block !important; /* Force enable joystick on smaller viewports */
+    #joystick-container,
+    #spawn-soldier-btn,
+    #spawn-general-btn,
+    #spawn-princess-btn,
+    #weather-magic-btn,
+    #buy-archer-btn,
+    #buy-axeman-btn,
+    #buy-crossbow-btn,
+    #buy-bomber-btn {
+        display: none !important; /* Hide joystick and other desktop HUD actions on mobile */
+    }
+    .mobile-only-btn {
+        display: flex !important; /* Enable mobile unified buttons */
     }
 
     /* Mobile overlay text & layout optimizations */
