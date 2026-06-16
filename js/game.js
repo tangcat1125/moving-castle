@@ -63,82 +63,6 @@ class GameController {
         // Mobile Joystick
         this.joystickVector = { x: 0, y: 0 };
 
-        // HUD card deck
-        this.shopOpen = false;
-        this.deckCards = [
-            {
-                id: 'archer',
-                name: '弓箭手',
-                role: 'Utility',
-                cost: 80,
-                description: '遠程壓制，前期最穩定的輸出卡。',
-                tags: ['普通', 'utility'],
-                accent: '#f39c12',
-            },
-            {
-                id: 'axeman',
-                name: '斧兵',
-                role: 'Attack',
-                cost: 120,
-                description: '近戰突破，適合快速清線與拆壓。',
-                tags: ['普通', 'attack'],
-                accent: '#e74c3c',
-            },
-            {
-                id: 'crossbow',
-                name: '弩兵',
-                role: 'Defense',
-                cost: 150,
-                description: '高穿透射擊，能有效壓制厚血單位。',
-                tags: ['普通', 'defense'],
-                accent: '#3498db',
-            },
-            {
-                id: 'bomber',
-                name: '炸彈兵',
-                role: 'Defense',
-                cost: 180,
-                description: '範圍爆破卡，適合在敵潮密集時翻盤。',
-                tags: ['普通', 'defense'],
-                accent: '#9b59b6',
-            },
-            {
-                id: 'soldier',
-                name: '士兵',
-                role: 'Support',
-                cost: 50,
-                description: '便宜前排，能幫你穩住整條戰線。',
-                tags: ['召喚', 'support'],
-                accent: '#2ecc71',
-            },
-            {
-                id: 'general',
-                name: '將軍',
-                role: 'Support',
-                cost: 120,
-                description: '高價值支援卡，適合中期強勢推進。',
-                tags: ['召喚', 'support'],
-                accent: '#c0392b',
-            },
-            {
-                id: 'princess',
-                name: '公主',
-                role: 'Support',
-                cost: 180,
-                description: '後排增益與續航核心，撐場面很重要。',
-                tags: ['召喚', 'support'],
-                accent: '#f1c40f',
-            },
-            {
-                id: 'repair',
-                name: '修復城堡',
-                role: 'Utility',
-                cost: 50,
-                description: '回復城堡生命，為下一波爭取時間。',
-                tags: ['回復', 'utility'],
-                accent: '#95a5a6',
-            }
-        ];
     }
 
     init() {
@@ -214,7 +138,6 @@ class GameController {
         // Setup Direct Canvas Touch Controls
         this.setupDirectCanvasTouch();
 
-        this.renderDeckCards();
         this.updateHUD();
         this.animate();
     }
@@ -450,7 +373,6 @@ class GameController {
         this.castleFrozenTimer = 0;
         this.cameraShakeTimer = 0;
         this.dragonComboTimer = 0;
-        this.closeShopModal();
 
         // Reset mobile joystick state
         if (this.joystickVector) {
@@ -571,41 +493,6 @@ class GameController {
 
     }
 
-    renderDeckCards() {
-        const deckCards = document.getElementById('deck-cards');
-        if (!deckCards) return;
-
-        deckCards.innerHTML = '';
-        this.deckCards.forEach(card => {
-            const cardEl = document.createElement('article');
-            cardEl.className = 'deck-card';
-            cardEl.style.setProperty('--card-accent', card.accent);
-            cardEl.innerHTML = `
-                <div class="deck-card-name">${card.name}</div>
-                <div class="deck-card-meta">${card.role} / Cost ${card.cost}</div>
-                <div class="deck-card-desc">${card.description}</div>
-                <div class="deck-card-tags">
-                    ${card.tags.map(tag => `<span class="deck-tag">${tag}</span>`).join('')}
-                </div>
-            `;
-            deckCards.appendChild(cardEl);
-        });
-    }
-
-    toggleShopModal(forceOpen = null) {
-        const modal = document.getElementById('shop-modal');
-        if (!modal) return;
-
-        const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !this.shopOpen;
-        this.shopOpen = shouldOpen;
-        modal.classList.toggle('open', shouldOpen);
-        modal.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
-    }
-
-    closeShopModal() {
-        this.toggleShopModal(false);
-    }
-
     selectShopItem(item) {
         if (this.gameOver) return;
 
@@ -643,7 +530,6 @@ class GameController {
             }
         }
         this.updateHUD();
-        this.closeShopModal();
     }
 
     spawnMeleeAlly(type) {
@@ -1441,23 +1327,7 @@ window.addEventListener('DOMContentLoaded', () => {
         game.startNewGame();
     });
 
-    const shopLauncher = document.getElementById('shop-launcher');
-    const shopModal = document.getElementById('shop-modal');
-    const shopClose = document.getElementById('shop-modal-close');
-    if (shopLauncher) {
-        shopLauncher.addEventListener('click', (e) => {
-            e.stopPropagation();
-            game.toggleShopModal();
-        });
-    }
-    if (shopClose) {
-        shopClose.addEventListener('click', () => game.closeShopModal());
-    }
-    if (shopModal) {
-        shopModal.querySelectorAll('[data-close-shop]').forEach(el => {
-            el.addEventListener('click', () => game.closeShopModal());
-        });
-    }
+
 
     // Defenders shop hooks
     document.getElementById('buy-archer-btn').addEventListener('click', () => game.selectShopItem('archer'));
