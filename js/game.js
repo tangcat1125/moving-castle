@@ -1441,6 +1441,24 @@ window.addEventListener('DOMContentLoaded', () => {
         game.startNewGame();
     });
 
+    const shopLauncher = document.getElementById('shop-launcher');
+    const shopModal = document.getElementById('shop-modal');
+    const shopClose = document.getElementById('shop-modal-close');
+    if (shopLauncher) {
+        shopLauncher.addEventListener('click', (e) => {
+            e.stopPropagation();
+            game.toggleShopModal();
+        });
+    }
+    if (shopClose) {
+        shopClose.addEventListener('click', () => game.closeShopModal());
+    }
+    if (shopModal) {
+        shopModal.querySelectorAll('[data-close-shop]').forEach(el => {
+            el.addEventListener('click', () => game.closeShopModal());
+        });
+    }
+
     // Defenders shop hooks
     document.getElementById('buy-archer-btn').addEventListener('click', () => game.selectShopItem('archer'));
     document.getElementById('buy-axeman-btn').addEventListener('click', () => game.selectShopItem('axeman'));
